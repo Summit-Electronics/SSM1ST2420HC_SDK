@@ -159,6 +159,8 @@ int count = 0;
 int Ax = 0;
 int x;
 
+/* github test 19-6-23 */
+
 
 /*  CAN RECEIVE INTERRUPT */
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
