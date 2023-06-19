@@ -63,8 +63,8 @@ all: main-build
 main-build: 1_AXIS_F091_GPIO.elf secondary-outputs
 
 # Tool invocations
-1_AXIS_F091_GPIO.elf 1_AXIS_F091_GPIO.map: $(OBJS) $(USER_OBJS) C:\Users\wesley\OneDrive\ -\ TOP-electronics\STM32CubeIDE\workspace_1.9.0\1_AXIS_F091_GPIO\STM32F091CCTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "1_AXIS_F091_GPIO.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m0 -T"C:\Users\wesley\OneDrive - TOP-electronics\STM32CubeIDE\workspace_1.9.0\1_AXIS_F091_GPIO\STM32F091CCTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="1_AXIS_F091_GPIO.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+1_AXIS_F091_GPIO.elf 1_AXIS_F091_GPIO.map: $(OBJS) $(USER_OBJS) C:\Github_Local\SSM1ST2420HC\1_AXIS_F091_GPIO\STM32F091CCTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "1_AXIS_F091_GPIO.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m0 -T"C:\Github_Local\SSM1ST2420HC\1_AXIS_F091_GPIO\STM32F091CCTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="1_AXIS_F091_GPIO.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
