@@ -50,3 +50,9 @@ release
 *.su
 *.idb
 *.pdb
+*.elf
+*.list
+*.o
+*.o
+*.mk
+*.o
