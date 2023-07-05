@@ -101,7 +101,7 @@ uint16_t currentposition = 0;
 uint16_t open_pos = 0;
 uint16_t closed_pos = 0;
 
-//test 19-6-23 date last edited
+//test 5-7-23
 
 /*  CAN RECEIVE INTERRUPT */
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
