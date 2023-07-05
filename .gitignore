@@ -59,3 +59,5 @@ release
 *.xml
 *.mk
 *.xml
+*.xml
+*.prefs
