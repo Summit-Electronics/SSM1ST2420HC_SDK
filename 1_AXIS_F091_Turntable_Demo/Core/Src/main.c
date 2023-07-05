@@ -225,6 +225,7 @@ int main(void)
 		  HAL_Delay(1000);
 		  TMC5160_SPIWrite(0x21, 0x00000000, 1);// writing value to address 24 = 0x2D(XTARGET)  1 lap
 		  Number_Of_Steps = 0;
+		  TMC5160_Rotate_To(0, &Ramp1);
 		  Drive_Enable(1); // enable driver
 	  }
 
