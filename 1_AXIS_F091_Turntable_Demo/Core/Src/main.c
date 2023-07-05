@@ -95,7 +95,7 @@ int Number_Of_Steps = 0;
 
 uint32_t Steps[12] = {4267, 8533, 12800, 17067, 21333, 25600, 29867, 34133, 38400, 42667, 46933, 51200};
 
-//test 19-6-23 date last edited
+//test 5-7-23
 
 /*  CAN RECEIVE INTERRUPT */
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)

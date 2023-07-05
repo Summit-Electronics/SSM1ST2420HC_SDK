@@ -58,3 +58,4 @@ release
 *.o
 *.xml
 *.mk
+*.xml
