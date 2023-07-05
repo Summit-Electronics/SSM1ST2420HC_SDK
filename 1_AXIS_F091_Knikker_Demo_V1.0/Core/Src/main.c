@@ -232,7 +232,7 @@ int main(void)
   }
 
 //wait condition when Raspi is not initialized
-  /*
+
   while(Read_IN(2) == 1) //Wait for RASPI signal to start
   {
   }
@@ -242,7 +242,7 @@ int main(void)
   //wait condition after Raspi is initialized
   while(Read_IN(2) == 0) //Wait for RASPI signal to start
   {
-  }*/
+  }
 
 //signal PLC to start
   HAL_GPIO_WritePin(GPIOB,EXT_OUT_1_Pin,1);
@@ -269,14 +269,12 @@ int main(void)
 
 	  Toggle_OUT(2,100); //signal Raspi to check marble
 
-	  //HAL_GPIO_WritePin(GPIOB,EXT_OUT_2_Pin,0); // make sure raspi waits
-
 
 	  while(Read_IN(2) == 1) //Wait for Raspi signal marble is measured
 	  {
 	  }
 
-	  HAL_Delay(300);
+	  HAL_Delay(1500);
 
 	  if(Read_IN(2) == 0)  // 2 Pulses for Glass
 	  {
