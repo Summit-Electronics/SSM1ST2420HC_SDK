@@ -478,7 +478,7 @@ uint16_t ENC_Get_Position(void)
 }
 
 
-void Toggle_OUT(int port ,uint8_t time)
+void Toggle_OUT(int port ,uint16_t time)
 {
 	if(port == 1)//Enable OUT1 for 1 sec (24V)
 	{

@@ -209,7 +209,7 @@ int main(void)
   }
 
   Drive_Enable(0);
-
+  HAL_Delay(100);
   TMC5160_Init_Stallguard(1); // clear stall flag
   //TODO: Disable stallguard needed?
 
@@ -217,7 +217,7 @@ int main(void)
   TMC5160_SPIWrite(0x21, 0x00000000, 1);// writing value to address 24 = 0x2D(XTARGET)  1 lap
   Open = 0;
   open_pos = 0;
-  closed_pos = 13600;
+  closed_pos = 13800;
   Drive_Enable(1); // enable driver
 
   TMC5160_Rotate_To(open_pos,&Ramp1); // open
@@ -232,7 +232,6 @@ int main(void)
   }
 
 //wait condition when Raspi is not initialized
-
   while(Read_IN(2) == 1) //Wait for RASPI signal to start
   {
   }
@@ -244,10 +243,13 @@ int main(void)
   {
   }
 
+
 //signal PLC to start
   HAL_GPIO_WritePin(GPIOB,EXT_OUT_1_Pin,1);
-  HAL_Delay(500);
+  HAL_Delay(1000);
   HAL_GPIO_WritePin(GPIOB,EXT_OUT_1_Pin,0);
+
+
 
  // HAL_GPIO_WritePin(GPIOA, DRV_ENN_Pin, 0); // LOW = ON
  // HAL_Delay(10);
@@ -268,20 +270,22 @@ int main(void)
   	  }
 
 	  Toggle_OUT(2,100); //signal Raspi to check marble
+	  HAL_Delay(800);
+	  Toggle_OUT(2,500); //signal Raspi to check marble
 
 
 	  while(Read_IN(2) == 1) //Wait for Raspi signal marble is measured
 	  {
 	  }
 
-	  HAL_Delay(1500);
+	  HAL_Delay(1500); // do not change (for receiving pulses)
 
 	  if(Read_IN(2) == 0)  // 2 Pulses for Glass
 	  {
 		  Reading_Marble = 1; // Glass
 	  }
 
-	  HAL_Delay(1000);
+	  HAL_Delay(4000); // delay to add more time to sequence
 
 	  Marbles[0] = Reading_Marble;
 
