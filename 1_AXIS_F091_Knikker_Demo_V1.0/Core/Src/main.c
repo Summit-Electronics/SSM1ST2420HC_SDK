@@ -233,6 +233,8 @@ int main(void)
 	  Marbles[m] = 0;
   }
 
+
+  //TODO: dit ombouwen (2 verschillende wachtondities is vragen om problemen)
 //wait condition when Raspi is not initialized
   while(Read_IN(2) == 1) //Wait for RASPI signal to start
   {

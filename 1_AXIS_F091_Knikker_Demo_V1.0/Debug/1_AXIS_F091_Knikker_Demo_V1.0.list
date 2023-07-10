@@ -4343,6 +4343,8 @@ int main(void)
  8001f0a:	dbf0      	blt.n	8001eee <main+0x16e>
   }
 
+
+  //TODO: dit ombouwen (2 verschillende wachtondities is vragen om problemen)
 //wait condition when Raspi is not initialized
   while(Read_IN(2) == 1) //Wait for RASPI signal to start
  8001f0c:	46c0      	nop			; (mov r8, r8)
