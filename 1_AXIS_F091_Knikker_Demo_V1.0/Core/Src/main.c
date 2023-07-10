@@ -177,7 +177,7 @@ int main(void)
 
   TMC5160_Basic_Init(&CurrentSetting1); 	//TMC5160 basic init
 
-  HAL_GPIO_WritePin(GPIOB,EXT_OUT_2_Pin,0); // make sure raspi waits
+  HAL_GPIO_WritePin(GPIOB,EXT_OUT_2_Pin,1); // make sure raspi waits
   HAL_GPIO_WritePin(GPIOB,EXT_OUT_1_Pin,0); // male sure PLC waits
 
   /*
@@ -271,9 +271,11 @@ int main(void)
   	  {
   	  }
 
-	  Toggle_OUT(2,100); //signal Raspi to check marble
-	  HAL_Delay(800);
-	  Toggle_OUT(2,500); //signal Raspi to check marble
+
+	  // signal Raspi to start
+	  HAL_GPIO_WritePin(GPIOB,EXT_OUT_2_Pin,0);
+	  HAL_Delay(100);
+	  HAL_GPIO_WritePin(GPIOB,EXT_OUT_2_Pin,1);
 
 
 	  while(Read_IN(2) == 1) //Wait for Raspi signal marble is measured
