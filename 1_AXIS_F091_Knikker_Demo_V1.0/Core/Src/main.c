@@ -193,7 +193,7 @@ int main(void)
   HAL_Delay(10);
   TMC5160_Init_Stallguard(0);
 
-  while(stall == 0 && stallcounter < 40) //wait for stepper to reach closed position
+  while(stall == 0 && stallcounter < 35) //wait for stepper to reach closed position
   {
 		//TMC5160_Monitor_Stallguard();
 	    HAL_Delay(10);
@@ -208,20 +208,22 @@ int main(void)
 		}
   }
 
-  Drive_Enable(0);
-  HAL_Delay(100);
-  TMC5160_Init_Stallguard(1); // clear stall flag
-  //TODO: Disable stallguard needed?
+  if (stall == 0)
+  {
+	  Drive_Enable(0);
+	  HAL_Delay(100);
+	  TMC5160_Init_Stallguard(1); // clear stall flag
+  }
 
-  HAL_Delay(1000);
   TMC5160_SPIWrite(0x21, 0x00000000, 1);// writing value to address 24 = 0x2D(XTARGET)  1 lap
+  TMC5160_Rotate_To(0, &Ramp1);
+  HAL_Delay(1500);
+
   Open = 0;
   open_pos = 0;
   closed_pos = 13800;
-  Drive_Enable(1); // enable driver
 
-  TMC5160_Rotate_To(open_pos,&Ramp1); // open
-  HAL_Delay(500);
+  Drive_Enable(1); // enable driver
   TMC5160_Rotate_To(closed_pos,&Ramp1); // close
   Open = 1;
   Drive_Enable(0); // enable driver
