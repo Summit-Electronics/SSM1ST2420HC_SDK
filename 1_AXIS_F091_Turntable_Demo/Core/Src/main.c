@@ -132,10 +132,11 @@ int main(void)
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
 
-
 	HAL_Init();
 
   /* USER CODE BEGIN Init */
+
+	HAL_Delay(2000);
 
   /* USER CODE END Init */
 
@@ -178,7 +179,6 @@ int main(void)
 
   CurrentSetting1.IHOLD = 5;
   CurrentSetting1.IRUN 	= 15;
-
 
   TMC5160_Basic_Init(&CurrentSetting1);
 

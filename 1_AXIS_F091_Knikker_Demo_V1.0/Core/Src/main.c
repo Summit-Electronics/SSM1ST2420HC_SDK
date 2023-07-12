@@ -101,7 +101,7 @@ uint16_t currentposition = 0;
 uint16_t open_pos = 0;
 uint16_t closed_pos = 0;
 
-//test 5-7-23
+//test 12-7-23
 
 /*  CAN RECEIVE INTERRUPT */
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
@@ -142,6 +142,8 @@ int main(void)
 
   /* USER CODE BEGIN Init */
 
+  HAL_Delay(2000); //delay to allow crystal to wake up.
+
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -158,8 +160,9 @@ int main(void)
   MX_SPI1_Init();
   MX_SPI2_Init();
   /* USER CODE BEGIN 2 */
+  HAL_GPIO_WritePin(GPIOB,EXT_OUT_2_Pin,1); // make sure raspi waits
   TMC5160_Stop();
-  HAL_GPIO_WritePin(GPIOA, DRV_ENN_Pin, 1); // HIGH = OFF
+  Drive_Enable(0);
 
   HAL_Delay(2500);			//startup delay, so motor does not spin on debug
 
@@ -177,17 +180,11 @@ int main(void)
 
   TMC5160_Basic_Init(&CurrentSetting1); 	//TMC5160 basic init
 
-  HAL_GPIO_WritePin(GPIOB,EXT_OUT_2_Pin,1); // make sure raspi waits
   HAL_GPIO_WritePin(GPIOB,EXT_OUT_1_Pin,0); // male sure PLC waits
 
-  /*
-   * write closing mechanism code
-   * - rotate to direction 0 until stall
-   * after stall, open=0
-   * disable stallguard
-   */
 
   Drive_Enable(1); // enable driver
+
 
   TMC5160_Basic_Rotate(1, &Ramp1);
   HAL_Delay(10);
@@ -233,9 +230,19 @@ int main(void)
 	  Marbles[m] = 0;
   }
 
+  while(Read_IN(2) == 1) //Wait for RASPI signal to start
+  {
+  }
 
-  //TODO: dit ombouwen (2 verschillende wachtondities is vragen om problemen)
-//wait condition when Raspi is not initialized
+  while(Read_IN(2) == 0) //Wait for RASPI signal to start
+  {
+  }
+
+  HAL_GPIO_WritePin(GPIOB,EXT_OUT_2_Pin,1);
+
+  //TODO: dit ombouwen (2 verschillende wachtondities binnen 1 sec?? )
+  /*
+  //wait condition when Raspi is not initialized
   while(Read_IN(2) == 1) //Wait for RASPI signal to start
   {
   }
@@ -246,7 +253,7 @@ int main(void)
   while(Read_IN(2) == 0) //Wait for RASPI signal to start
   {
   }
-
+*/
 
 //signal PLC to start
   HAL_GPIO_WritePin(GPIOB,EXT_OUT_1_Pin,1);
