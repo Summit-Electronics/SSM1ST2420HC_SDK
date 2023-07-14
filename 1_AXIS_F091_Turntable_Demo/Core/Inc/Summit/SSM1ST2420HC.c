@@ -13,12 +13,20 @@ uint32_t SG_RESULTS[1000];
 uint32_t T_STEP[1000];
 int x = 0;
 
+int Standstill = 0;
+int SG2_trigger = 0;
+int Driver_error = 0;
+int Reset_error = 0;
+
+
+
 void TMC5160_Basic_Init(CurrentConfig *Current)
 {
 	/* CURRENT SETTINGS
 	 I_RUN, Max run current = 20 = ~2.0A
 	 I_HOLD, Max Hold current = 20 = ~2.0A
 	*/
+
 
 	uint32_t IHOLD_IRUN = 0x00070000; // standard IHOLD DELAY value
 	//uint32_t GSTAT_VALUE = 0x00000000; //default value for GSTAT
@@ -36,7 +44,10 @@ void TMC5160_Basic_Init(CurrentConfig *Current)
 	IHOLD_IRUN += Current->IHOLD + (Current->IRUN <<8);
 
 	TMC5160_SPIWrite(0x00, 0x00000008, 1); // writing value 0x00000008 = 8 = 0.0 to address 0 = 0x00(GCONF)
-	TMC5160_SPIWrite(0x00, 0x00000008, 0); // writing value 0x00000008 = 8 = 0.0 to address 0 = 0x00(GCONF)
+	TMC5160_SPIWrite(0x00, 0x00000000, 0); // writing value 0x00000008 = 8 = 0.0 to address 0 = 0x00(GCONF)
+	TMC5160_SPIWrite(0x01, 0x00000006, 1); // write 1 to clear GSTAT (clear GSTAT register)
+	TMC5160_SPIWrite(0x01, 0x00000000, 0); // read GSTAT (should be all 0)
+	TMC5160_SPIWrite(0x35, 0x00000040, 1); //0x35(RAMP_STAT)
 
 	/*
 	GSTAT_VALUE = TMC5160_SPIWrite(0x01, 0x00000000, 0); // read GSTAT (should be all 0)
@@ -135,6 +146,7 @@ int TMC5160_Monitor_Stallguard(void)
 	uint32_t DRV_STATUS;
 	int Stall_Flag = 0;
 
+	TMC5160_SPIWrite(0x6F, 0x00000000, 0);
 	DRV_STATUS = TMC5160_SPIWrite(0x6F, 0x00000000, 0); //Read (DRV_STATUS)
 	//T_STEP[x] = TMC5160_SPIWrite(0x12, 0x00000000, 0); // 0x12(TSTEP)
 
@@ -146,7 +158,7 @@ int TMC5160_Monitor_Stallguard(void)
 		TMC5160_Stop();
 	}
 
-	for(int y = 32; y > 10; y--) // clear other data
+	for(int y = 32; y > 10; y--) //clear other data
 	{
 		DRV_STATUS &= ~(1 << y);
 	}
@@ -158,8 +170,9 @@ int TMC5160_Monitor_Stallguard(void)
 	{
 		x = 0;
 
-	    HAL_GPIO_WritePin(GPIOA,DRV_ENN_Pin,1); // LOW = ON
-	    TMC5160_Stop();
+		//uncomment for stallguard demo
+	    //HAL_GPIO_WritePin(GPIOA,DRV_ENN_Pin,1); // LOW = ON
+	    //TMC5160_Stop();
 	}
 
 	return Stall_Flag;
@@ -271,21 +284,41 @@ void TMC5160_Stop(void)
 
 void Drive_Enable(int state)
 {
+	uint32_t DRV_STATUS;
+
 	if(state == 1) // Enable driver
 	{
 		HAL_GPIO_WritePin(GPIOA, DRV_ENN_Pin, 0); // LOW = ON
 		HAL_Delay(10);
+
+		TMC5160_SPIWrite(0x6F, 0x00000000, 0);
+		DRV_STATUS = TMC5160_SPIWrite(0x6F, 0x00000000, 0); //Read (DRV_STATUS)
+
+		if(DRV_STATUS & (0 << 20) && DRV_STATUS & (0 << 19) && DRV_STATUS & (0 << 18) && DRV_STATUS & (0 << 17) && DRV_STATUS & (0 << 16))
+		{
+			//issue with Init.
+			HAL_GPIO_WritePin(GPIOB, EXT_OUT_2_Pin, 0);
+			HAL_Delay(300);
+			HAL_GPIO_WritePin(GPIOB, EXT_OUT_2_Pin, 1);
+			HAL_Delay(300);
+
+			HAL_NVIC_SystemReset(); // risky should not be in final code
+		}
 	}
+
 
 	if(state == 0) // disable drive
 	{
 		HAL_GPIO_WritePin(GPIOA, DRV_ENN_Pin, 1); // HIGH = OFF
 		HAL_Delay(10);
+
+		TMC5160_SPIWrite(0x6F, 0x00000000, 0);
+		DRV_STATUS = TMC5160_SPIWrite(0x6F, 0x00000000, 0); //Read (DRV_STATUS)
 	}
 }
 
 
-uint32_t TMC5160_SPIWrite(uint8_t Address, uint32_t Value, int Action)
+uint32_t TMC5160_SPIWrite(uint8_t Address, uint32_t Value, int Action)  // 1 = write 0 = read
 {
 
 	uint8_t SPI2TxData[5];  //TX data array SPI2
@@ -311,7 +344,6 @@ uint32_t TMC5160_SPIWrite(uint8_t Address, uint32_t Value, int Action)
 
 	  HAL_SPI_TransmitReceive(&hspi2, SPI2TxData, SPI2RxData, 0x05, 100);
 
-
 	  SPI2Rx += (SPI2RxData[1] << 24);
 	  SPI2Rx += (SPI2RxData[2] << 16);
 	  SPI2Rx += (SPI2RxData[3] << 8);
@@ -319,7 +351,77 @@ uint32_t TMC5160_SPIWrite(uint8_t Address, uint32_t Value, int Action)
 
 	  HAL_GPIO_WritePin(GPIOB,TMC_CS_Pin,1); // set TMC CS high
 
+	  if(Driver_error == 0)
+	  {
+		// check SPI error frame for issues:
+		if (SPI2RxData[0] & (1 << 3)) // standstill
+		{
+			Standstill = 1; // no action needed
+		}
+
+		if (SPI2RxData[0] & (1 << 2)) // SG2 trigger
+		{
+			SG2_trigger = 1; // no action needed
+		}
+
+		if (SPI2RxData[0] & (1 << 1)) //Driver error
+		{
+			Driver_error = 1; // possible action needed
+			TMC5160_Fault_monitor(); //check the critical error
+		}
+
+		if (SPI2RxData[0] & (1 << 0)) //Reset Flag
+		{
+			Reset_error = 1; // no action needed
+		}
+	  }
+
 	  return SPI2Rx;
+}
+
+void TMC5160_Fault_monitor(void)
+{
+	uint32_t DRV_STATUS;
+	int Critical_error = 0;
+
+	TMC5160_SPIWrite(0x6F, 0x00000000, 0);
+	DRV_STATUS = TMC5160_SPIWrite(0x6F, 0x00000000, 0); //Read (DRV_STATUS)
+
+	TMC5160_SPIWrite(0x01, 0x00000006, 1); // write 1 to clear GSTAT (clear GSTAT register)
+	TMC5160_SPIWrite(0x01, 0x00000000, 0); // read GSTAT (should be all 0)
+
+	// check if critical error
+	//bits 31 t/m 25  , 13 en 12
+
+	//DRV_STATUS & (1 << 31) || DRV_STATUS & (1 << 30) || DRV_STATUS & (1 << 29) ||
+
+	if(DRV_STATUS & (1 << 28) || DRV_STATUS & (1 << 27) || DRV_STATUS & (1 << 26) || DRV_STATUS & (1 << 25) || DRV_STATUS & (1 << 13) || DRV_STATUS & (1 << 12))
+	{
+		Critical_error = 1;
+	}
+
+	if (Critical_error == 1) {
+
+		//signal error occured (only on 1_axis_demo code)
+		HAL_GPIO_WritePin(GPIOB, EXT_OUT_2_Pin, 0);
+		HAL_Delay(300);
+		HAL_GPIO_WritePin(GPIOB, EXT_OUT_2_Pin, 1);
+		HAL_Delay(300);
+		HAL_GPIO_WritePin(GPIOB, EXT_OUT_2_Pin, 0);
+		HAL_Delay(300);
+		HAL_GPIO_WritePin(GPIOB, EXT_OUT_2_Pin, 1);
+		HAL_Delay(300);
+
+		TMC5160_Stop();
+		Drive_Enable(0);
+
+		HAL_NVIC_SystemReset(); // risky should not be in final code
+	}
+
+	else
+	{
+		Driver_error = 0;
+	}
 }
 
 void AMS5055_Basic_Init(void)

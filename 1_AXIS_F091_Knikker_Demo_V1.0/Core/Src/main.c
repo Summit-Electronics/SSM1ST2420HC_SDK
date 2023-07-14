@@ -163,12 +163,6 @@ int main(void)
   HAL_GPIO_WritePin(GPIOB,EXT_OUT_2_Pin,1); // make sure raspi waits
   HAL_Delay(100);
 
-  // signal Raspi in case raspi is already powered
-  HAL_GPIO_WritePin(GPIOB,EXT_OUT_2_Pin,0);
-  HAL_Delay(200);
-  HAL_GPIO_WritePin(GPIOB,EXT_OUT_2_Pin,1);
-
-
   TMC5160_Stop();
   Drive_Enable(0);
 
@@ -188,13 +182,18 @@ int main(void)
 
   TMC5160_Basic_Init(&CurrentSetting1); 	//TMC5160 basic init
 
+  HAL_GPIO_WritePin(GPIOB,EXT_OUT_2_Pin,0);
+  HAL_Delay(100);
+  HAL_GPIO_WritePin(GPIOB,EXT_OUT_2_Pin,1);
+
   HAL_GPIO_WritePin(GPIOB,EXT_OUT_1_Pin,0); // male sure PLC waits
 
   Drive_Enable(1); // enable driver
 
   TMC5160_Basic_Rotate(1, &Ramp1);
-  HAL_Delay(10);
+  HAL_Delay(50);
   TMC5160_Init_Stallguard(0);
+
 
   while(stall == 0 && stallcounter < 35) //wait for stepper to reach closed position
   {
@@ -220,6 +219,11 @@ int main(void)
 
   TMC5160_SPIWrite(0x21, 0x00000000, 1);// writing value to address 24 = 0x2D(XTARGET)  1 lap
   TMC5160_Rotate_To(0, &Ramp1);
+
+  HAL_GPIO_WritePin(GPIOB,EXT_OUT_2_Pin,0);
+  HAL_Delay(100);
+  HAL_GPIO_WritePin(GPIOB,EXT_OUT_2_Pin,1);
+
   HAL_Delay(1500);
 
   Open = 0;
@@ -229,7 +233,7 @@ int main(void)
   Drive_Enable(1); // enable driver
   TMC5160_Rotate_To(closed_pos,&Ramp1); // close
   Open = 1;
-  Drive_Enable(0); // enable driver
+  Drive_Enable(0); // disable driver
 
   for(m = 0; m < NumberofMarbles; m++) //Clear Array, and make sure all are 0
   {
@@ -285,12 +289,9 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-
-
   	  while(Read_IN(1) == 1) //Wait for PLC signal that marble is in place
   	  {
   	  }
-
 
 	  // signal Raspi to start
 	  HAL_GPIO_WritePin(GPIOB,EXT_OUT_2_Pin,0);

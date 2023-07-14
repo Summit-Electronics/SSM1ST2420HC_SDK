@@ -195,10 +195,14 @@ int main(void)
 		TMC5160_Init_Stallguard(0);
 	}
 
-  Drive_Enable(0); // enable driver
+  Drive_Enable(0); // disable driver
   HAL_Delay(1000);
   TMC5160_SPIWrite(0x21, 0x00000000, 1);// writing value to address 24 = 0x2D(XTARGET)  1 lap
   Drive_Enable(1); // enable driver
+
+  //test movement
+  TMC5160_Rotate_To(1000, &Ramp1);
+
 
   /* USER CODE END 2 */
 
