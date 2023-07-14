@@ -21,6 +21,7 @@ void TMC5160_Basic_Init(CurrentConfig *Current)
 	*/
 
 	uint32_t IHOLD_IRUN = 0x00070000; // standard IHOLD DELAY value
+	//uint32_t GSTAT_VALUE = 0x00000000; //default value for GSTAT
 
 	if(Current->IHOLD > 20) // set upper current limit ~2.0A
 	{
@@ -36,6 +37,15 @@ void TMC5160_Basic_Init(CurrentConfig *Current)
 
 	TMC5160_SPIWrite(0x00, 0x00000008, 1); // writing value 0x00000008 = 8 = 0.0 to address 0 = 0x00(GCONF)
 	TMC5160_SPIWrite(0x00, 0x00000008, 0); // writing value 0x00000008 = 8 = 0.0 to address 0 = 0x00(GCONF)
+
+	/*
+	GSTAT_VALUE = TMC5160_SPIWrite(0x01, 0x00000000, 0); // read GSTAT (should be all 0)
+	if(GSTAT_VALUE == 1)
+	{
+		TMC5160_SPIWrite(0x01, 0x00000001, 1); // write 1 bit to GSTAT to clear all error flags
+		// TODO: is clearing the flags enough? or poweqr cycle needed?
+	}*/
+
 	TMC5160_SPIWrite(0x03, 0x00000000, 1); // writing value 0x00000000 = 0 = 0.0 to address 1 = 0x03(SLAVECONF)
 	TMC5160_SPIWrite(0x05, 0x00000000, 1); // writing value 0x00000000 = 0 = 0.0 to address 2 = 0x05(X_COMPARE)
 	TMC5160_SPIWrite(0x06, 0x00000000, 1); // writing value 0x00000000 = 0 = 0.0 to address 3 = 0x06(OTP_PROG)
@@ -477,7 +487,7 @@ uint16_t ENC_Get_Position(void)
 }
 
 
-void Toggle_OUT(int port ,uint8_t time)
+void Toggle_OUT(int port ,uint16_t time)
 {
 	if(port == 1)//Enable OUT1 for 1 sec (24V)
 	{
