@@ -190,7 +190,6 @@ int main(void)
 	/* USER CODE BEGIN 3 */
 
 	HAL_Delay(10);
-	TMC5160_Monitor_Stallguard();
 
 	if (TMC5160_Monitor_Stallguard() == 1) // stall event
 	{
@@ -205,9 +204,6 @@ int main(void)
 		TMC5160_SPIWrite(0x21, 0x00000000, 0);
 		Home = TMC5160_SPIWrite(0x21, 0x00000000, 0); //read step counter from TMC5160
 		HAL_Delay(100);
-
-		// kwartslag = Home + 12800
-		//
 
 		TMC5160_Rotate_To((Home+12800),&Ramp1); //1 round
 		TMC5160_Rotate_To((Home),&Ramp1); //1 round
