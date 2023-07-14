@@ -29,8 +29,8 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
  ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_pwr_ex.h \
  ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_spi.h \
  ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_spi_ex.h \
- C:/Users/wesley.TOPSUMMIT/OneDrive\ -\ TOP\ Electronics/Documenten/GitHub/SSM1ST2420HC/1_AXIS_F091_STALLGUARD/Core/Inc/Summit/SSM1ST2420HC.h \
- C:/Users/wesley.TOPSUMMIT/OneDrive\ -\ TOP\ Electronics/Documenten/GitHub/SSM1ST2420HC/1_AXIS_F091_STALLGUARD/Core/Inc/Summit/AS5055A_Registers.h \
+ C:/Github_Local/SSM1ST2420HC/1_AXIS_F091_STALLGUARD/Core/Inc/Summit/SSM1ST2420HC.h \
+ C:/Github_Local/SSM1ST2420HC/1_AXIS_F091_STALLGUARD/Core/Inc/Summit/AS5055A_Registers.h \
  ../Core/Inc/tmc/ic/TMC5160/TMC5160.h \
  ../Core/Inc/tmc/helpers/API_Header.h ../Core/Inc/tmc/helpers/Config.h \
  ../Core/Inc/tmc/helpers/Constants.h ../Core/Inc/tmc/helpers/Types.h \
@@ -71,8 +71,8 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
 ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_pwr_ex.h:
 ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_spi.h:
 ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_spi_ex.h:
-C:/Users/wesley.TOPSUMMIT/OneDrive\ -\ TOP\ Electronics/Documenten/GitHub/SSM1ST2420HC/1_AXIS_F091_STALLGUARD/Core/Inc/Summit/SSM1ST2420HC.h:
-C:/Users/wesley.TOPSUMMIT/OneDrive\ -\ TOP\ Electronics/Documenten/GitHub/SSM1ST2420HC/1_AXIS_F091_STALLGUARD/Core/Inc/Summit/AS5055A_Registers.h:
+C:/Github_Local/SSM1ST2420HC/1_AXIS_F091_STALLGUARD/Core/Inc/Summit/SSM1ST2420HC.h:
+C:/Github_Local/SSM1ST2420HC/1_AXIS_F091_STALLGUARD/Core/Inc/Summit/AS5055A_Registers.h:
 ../Core/Inc/tmc/ic/TMC5160/TMC5160.h:
 ../Core/Inc/tmc/helpers/API_Header.h:
 ../Core/Inc/tmc/helpers/Config.h:

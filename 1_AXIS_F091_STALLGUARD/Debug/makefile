@@ -64,8 +64,8 @@ all: main-build
 main-build: 1_AXIS_F091_STALLGUARD.elf secondary-outputs
 
 # Tool invocations
-1_AXIS_F091_STALLGUARD.elf 1_AXIS_F091_STALLGUARD.map: $(OBJS) $(USER_OBJS) C:\Users\wesley.TOPSUMMIT\OneDrive\ -\ TOP\ Electronics\Documenten\GitHub\SSM1ST2420HC\1_AXIS_F091_STALLGUARD\STM32F091CCTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "1_AXIS_F091_STALLGUARD.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m0 -T"C:\Users\wesley.TOPSUMMIT\OneDrive - TOP Electronics\Documenten\GitHub\SSM1ST2420HC\1_AXIS_F091_STALLGUARD\STM32F091CCTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="1_AXIS_F091_STALLGUARD.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+1_AXIS_F091_STALLGUARD.elf 1_AXIS_F091_STALLGUARD.map: $(OBJS) $(USER_OBJS) C:\Github_Local\SSM1ST2420HC\1_AXIS_F091_STALLGUARD\STM32F091CCTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "1_AXIS_F091_STALLGUARD.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m0 -T"C:\Github_Local\SSM1ST2420HC\1_AXIS_F091_STALLGUARD\STM32F091CCTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="1_AXIS_F091_STALLGUARD.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
