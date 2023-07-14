@@ -108,7 +108,7 @@ uint16_t ENC_Get_Position(void);
  */
 
 /* GPIO functions */
-void Toggle_OUT(int port,uint8_t time);
+void Toggle_OUT(int port,uint16_t time);
 /* Toggle (24V) Output on "port" for duration of "time"
  * "port" 1 or 2, respectively OUT1 or OUT2
  * "time" duration in ms
