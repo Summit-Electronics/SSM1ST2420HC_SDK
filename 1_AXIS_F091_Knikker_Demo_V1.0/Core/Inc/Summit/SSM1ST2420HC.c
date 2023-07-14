@@ -533,5 +533,3 @@ uint16_t Read_AIN(void)
 
 	return ADCReading;
 }
-
-

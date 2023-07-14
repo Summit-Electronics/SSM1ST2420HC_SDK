@@ -4671,20 +4671,20 @@ LOAD c:/st/stm32cubeide_1.9.0/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.exte
  .debug_macro   0x000000000001a156      0x1df ./Drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal_rcc.o
  .debug_macro   0x000000000001a335      0x1d5 ./Drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal_spi.o
 
-.debug_line     0x0000000000000000     0x9b9d
- .debug_line    0x0000000000000000      0xb7c ./Core/Inc/Summit/SSM1ST2420HC.o
- .debug_line    0x0000000000000b7c      0xa3f ./Core/Src/main.o
- .debug_line    0x00000000000015bb      0x865 ./Core/Src/stm32f0xx_hal_msp.o
- .debug_line    0x0000000000001e20      0x7e4 ./Core/Src/stm32f0xx_it.o
- .debug_line    0x0000000000002604      0x770 ./Core/Src/system_stm32f0xx.o
- .debug_line    0x0000000000002d74       0x89 ./Core/Startup/startup_stm32f091cctx.o
- .debug_line    0x0000000000002dfd      0x963 ./Drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal.o
- .debug_line    0x0000000000003760     0x11a9 ./Drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal_adc.o
- .debug_line    0x0000000000004909     0x1127 ./Drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal_can.o
- .debug_line    0x0000000000005a30      0xa0f ./Drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal_cortex.o
- .debug_line    0x000000000000643f      0xaf5 ./Drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal_gpio.o
- .debug_line    0x0000000000006f34      0xdf1 ./Drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal_rcc.o
- .debug_line    0x0000000000007d25     0x1e78 ./Drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal_spi.o
+.debug_line     0x0000000000000000     0x9b9f
+ .debug_line    0x0000000000000000      0xb7e ./Core/Inc/Summit/SSM1ST2420HC.o
+ .debug_line    0x0000000000000b7e      0xa3f ./Core/Src/main.o
+ .debug_line    0x00000000000015bd      0x865 ./Core/Src/stm32f0xx_hal_msp.o
+ .debug_line    0x0000000000001e22      0x7e4 ./Core/Src/stm32f0xx_it.o
+ .debug_line    0x0000000000002606      0x770 ./Core/Src/system_stm32f0xx.o
+ .debug_line    0x0000000000002d76       0x89 ./Core/Startup/startup_stm32f091cctx.o
+ .debug_line    0x0000000000002dff      0x963 ./Drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal.o
+ .debug_line    0x0000000000003762     0x11a9 ./Drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal_adc.o
+ .debug_line    0x000000000000490b     0x1127 ./Drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal_can.o
+ .debug_line    0x0000000000005a32      0xa0f ./Drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal_cortex.o
+ .debug_line    0x0000000000006441      0xaf5 ./Drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal_gpio.o
+ .debug_line    0x0000000000006f36      0xdf1 ./Drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal_rcc.o
+ .debug_line    0x0000000000007d27     0x1e78 ./Drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal_spi.o
 
 .debug_str      0x0000000000000000    0x9f61b
  .debug_str     0x0000000000000000    0x9d730 ./Core/Inc/Summit/SSM1ST2420HC.o
