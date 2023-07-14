@@ -138,7 +138,7 @@ int main(void)
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
 
-	HAL_Init();
+  HAL_Init();
 
   /* USER CODE BEGIN Init */
 
@@ -161,6 +161,14 @@ int main(void)
   MX_SPI2_Init();
   /* USER CODE BEGIN 2 */
   HAL_GPIO_WritePin(GPIOB,EXT_OUT_2_Pin,1); // make sure raspi waits
+  HAL_Delay(100);
+
+  // signal Raspi in case raspi is already powered
+  HAL_GPIO_WritePin(GPIOB,EXT_OUT_2_Pin,0);
+  HAL_Delay(200);
+  HAL_GPIO_WritePin(GPIOB,EXT_OUT_2_Pin,1);
+
+
   TMC5160_Stop();
   Drive_Enable(0);
 
@@ -182,9 +190,7 @@ int main(void)
 
   HAL_GPIO_WritePin(GPIOB,EXT_OUT_1_Pin,0); // male sure PLC waits
 
-
   Drive_Enable(1); // enable driver
-
 
   TMC5160_Basic_Rotate(1, &Ramp1);
   HAL_Delay(10);
@@ -229,6 +235,11 @@ int main(void)
   {
 	  Marbles[m] = 0;
   }
+
+  // signal Raspi in case raspi is already powered
+  HAL_GPIO_WritePin(GPIOB,EXT_OUT_2_Pin,0);
+  HAL_Delay(200);
+  HAL_GPIO_WritePin(GPIOB,EXT_OUT_2_Pin,1);
 
   while(Read_IN(2) == 1) //Wait for RASPI signal to start
   {

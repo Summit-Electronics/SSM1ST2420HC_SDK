@@ -312,7 +312,6 @@ uint32_t TMC5160_SPIWrite(uint8_t Address, uint32_t Value, int Action)
 
 	  HAL_SPI_TransmitReceive(&hspi2, SPI2TxData, SPI2RxData, 0x05, 100);
 
-
 	  SPI2Rx += (SPI2RxData[1] << 24);
 	  SPI2Rx += (SPI2RxData[2] << 16);
 	  SPI2Rx += (SPI2RxData[3] << 8);
