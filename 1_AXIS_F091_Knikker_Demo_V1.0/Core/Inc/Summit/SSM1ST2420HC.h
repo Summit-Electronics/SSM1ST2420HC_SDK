@@ -61,6 +61,18 @@ uint32_t TMC5160_SPIWrite(uint8_t Address, uint32_t Value, int Action);
  * "value", uint32_t value for the register
  */
 
+uint16_t TMC5160_Check_SG_Result(uint32_t DRV_STATUS_Register);
+/* read SG_Result and give DEC values back
+ *
+ *
+ */
+
+uint16_t TMC5160_Check_CS_Actual(uint32_t DRV_STATUS_Register);
+/* read CS_Actual and give DEC values back
+ *
+ *
+ */
+
 void TMC5160_Fault_monitor(void);
 /*
  *SPI signalled a Driver error in TMC5160

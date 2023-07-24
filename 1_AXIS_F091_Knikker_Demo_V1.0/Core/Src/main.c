@@ -38,7 +38,7 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
- ADC_HandleTypeDef hadc;
+ADC_HandleTypeDef hadc;
 
 CAN_HandleTypeDef hcan;
 
@@ -179,10 +179,6 @@ int main(void)
   CurrentSetting1.IRUN 	= 1;
 
   TMC5160_Basic_Init(&CurrentSetting1); 	//TMC5160 basic init
-
-  HAL_GPIO_WritePin(GPIOB,EXT_OUT_2_Pin,0);
-  HAL_Delay(100);
-  HAL_GPIO_WritePin(GPIOB,EXT_OUT_2_Pin,1);
 
   HAL_GPIO_WritePin(GPIOB,EXT_OUT_1_Pin,0); // make sure PLC waits
 
