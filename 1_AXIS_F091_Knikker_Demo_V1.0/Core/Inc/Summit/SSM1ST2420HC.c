@@ -296,7 +296,15 @@ void Drive_Enable(int state)
 		TMC5160_SPIWrite(0x04, 0x00000000, 0);
 		IOIN = TMC5160_SPIWrite(0x04, 0x00000000, 0); //Read (IOIN)
 
-		DRV_ENN = IOIN & (0 << 4);
+		if(IOIN & (1 << 4))
+		{
+			DRV_ENN = 1;
+		}
+
+		else
+		{
+			DRV_ENN = 0;
+		}
 
 		if(DRV_ENN == 0) //if DRV_ENN == 0 power stage is on
 		{
@@ -308,8 +316,8 @@ void Drive_Enable(int state)
 
 			if(CS_ACTUAL == 0)
 			{
+				Drive_Enable(0); // power down and reset
 				HAL_NVIC_SystemReset();
-				//TODO work in a restart/retry sequence before hardfault
 			}
 		}
 
@@ -317,7 +325,6 @@ void Drive_Enable(int state)
 		{
 			Drive_Enable(0); // power down and reset
 			HAL_NVIC_SystemReset();
-			//TODO work in a restart/retry sequence before hardfault
 		}
 	}
 
@@ -325,18 +332,6 @@ void Drive_Enable(int state)
 	{
 		HAL_GPIO_WritePin(GPIOA, DRV_ENN_Pin, 1); // HIGH = OFF
 		HAL_Delay(10);
-
-		TMC5160_SPIWrite(0x04, 0x00000000, 0);
-		IOIN = TMC5160_SPIWrite(0x04, 0x00000000, 0); //Read (IOIN)
-
-		if(IOIN & (0 << 4))
-		{
-			DRV_ENN == 0;
-		}
-		else if(IOIN & (1 << 4))
-		{
-			DRV_ENN == 1;
-		}
 	}
 }
 

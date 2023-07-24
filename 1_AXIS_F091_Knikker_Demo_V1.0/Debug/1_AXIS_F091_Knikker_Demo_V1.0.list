@@ -37,13 +37,13 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING, OCTETS
  16 .debug_macro  0001d408  00000000  00000000  0002c460  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .debug_line   0000a725  00000000  00000000  00049868  2**0
+ 17 .debug_line   0000a727  00000000  00000000  00049868  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_str    000aaaca  00000000  00000000  00053f8d  2**0
+ 18 .debug_str    000aaaca  00000000  00000000  00053f8f  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .comment      00000050  00000000  00000000  000fea57  2**0
+ 19 .comment      00000050  00000000  00000000  000fea59  2**0
                   CONTENTS, READONLY
- 20 .debug_frame  00002248  00000000  00000000  000feaa8  2**2
+ 20 .debug_frame  00002248  00000000  00000000  000feaac  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -4952,23 +4952,23 @@ void Drive_Enable(int state)
 	uint32_t DRV_STATUS;
 	uint32_t IOIN;
 	uint16_t SG_RESULT = 0;
- 8002600:	2416      	movs	r4, #22
- 8002602:	193b      	adds	r3, r7, r4
+ 8002600:	2312      	movs	r3, #18
+ 8002602:	18fb      	adds	r3, r7, r3
  8002604:	2200      	movs	r2, #0
  8002606:	801a      	strh	r2, [r3, #0]
 	uint16_t CS_ACTUAL = 0;
- 8002608:	2514      	movs	r5, #20
- 800260a:	197b      	adds	r3, r7, r5
+ 8002608:	2310      	movs	r3, #16
+ 800260a:	18fb      	adds	r3, r7, r3
  800260c:	2200      	movs	r2, #0
  800260e:	801a      	strh	r2, [r3, #0]
 	int DRV_ENN = 0;
  8002610:	2300      	movs	r3, #0
- 8002612:	613b      	str	r3, [r7, #16]
+ 8002612:	617b      	str	r3, [r7, #20]
 
 	if(state == 1) // Enable driver
  8002614:	687b      	ldr	r3, [r7, #4]
  8002616:	2b01      	cmp	r3, #1
- 8002618:	d141      	bne.n	800269e <Drive_Enable+0xa6>
+ 8002618:	d14d      	bne.n	80026b6 <Drive_Enable+0xbe>
 	{
 		HAL_GPIO_WritePin(GPIOA, DRV_ENN_Pin, 0); // LOW = ON
  800261a:	2380      	movs	r3, #128	; 0x80
@@ -4995,99 +4995,101 @@ void Drive_Enable(int state)
  8002644:	0003      	movs	r3, r0
  8002646:	60fb      	str	r3, [r7, #12]
 
-		DRV_ENN = IOIN & (0 << 4);
- 8002648:	2300      	movs	r3, #0
- 800264a:	613b      	str	r3, [r7, #16]
+		if(IOIN & (1 << 4))
+ 8002648:	68fb      	ldr	r3, [r7, #12]
+ 800264a:	2210      	movs	r2, #16
+ 800264c:	4013      	ands	r3, r2
+ 800264e:	d002      	beq.n	8002656 <Drive_Enable+0x5e>
+		{
+			DRV_ENN = 1;
+ 8002650:	2301      	movs	r3, #1
+ 8002652:	617b      	str	r3, [r7, #20]
+ 8002654:	e001      	b.n	800265a <Drive_Enable+0x62>
+		}
+
+		else
+		{
+			DRV_ENN = 0;
+ 8002656:	2300      	movs	r3, #0
+ 8002658:	617b      	str	r3, [r7, #20]
+		}
 
 		if(DRV_ENN == 0) //if DRV_ENN == 0 power stage is on
- 800264c:	693b      	ldr	r3, [r7, #16]
- 800264e:	2b00      	cmp	r3, #0
- 8002650:	d120      	bne.n	8002694 <Drive_Enable+0x9c>
+ 800265a:	697b      	ldr	r3, [r7, #20]
+ 800265c:	2b00      	cmp	r3, #0
+ 800265e:	d125      	bne.n	80026ac <Drive_Enable+0xb4>
 		{
 			TMC5160_SPIWrite(0x6F, 0x00000000, 0);
- 8002652:	2200      	movs	r2, #0
- 8002654:	2100      	movs	r1, #0
- 8002656:	206f      	movs	r0, #111	; 0x6f
- 8002658:	f000 f8cc 	bl	80027f4 <TMC5160_SPIWrite>
+ 8002660:	2200      	movs	r2, #0
+ 8002662:	2100      	movs	r1, #0
+ 8002664:	206f      	movs	r0, #111	; 0x6f
+ 8002666:	f000 f8c5 	bl	80027f4 <TMC5160_SPIWrite>
 			DRV_STATUS = TMC5160_SPIWrite(0x6F, 0x00000000, 0); //Read (DRV_STATUS)
- 800265c:	2200      	movs	r2, #0
- 800265e:	2100      	movs	r1, #0
- 8002660:	206f      	movs	r0, #111	; 0x6f
- 8002662:	f000 f8c7 	bl	80027f4 <TMC5160_SPIWrite>
- 8002666:	0003      	movs	r3, r0
- 8002668:	60bb      	str	r3, [r7, #8]
+ 800266a:	2200      	movs	r2, #0
+ 800266c:	2100      	movs	r1, #0
+ 800266e:	206f      	movs	r0, #111	; 0x6f
+ 8002670:	f000 f8c0 	bl	80027f4 <TMC5160_SPIWrite>
+ 8002674:	0003      	movs	r3, r0
+ 8002676:	60bb      	str	r3, [r7, #8]
 
 			SG_RESULT = TMC5160_Check_SG_Result(DRV_STATUS);
- 800266a:	193c      	adds	r4, r7, r4
- 800266c:	68bb      	ldr	r3, [r7, #8]
- 800266e:	0018      	movs	r0, r3
- 8002670:	f000 f833 	bl	80026da <TMC5160_Check_SG_Result>
- 8002674:	0003      	movs	r3, r0
- 8002676:	8023      	strh	r3, [r4, #0]
+ 8002678:	2312      	movs	r3, #18
+ 800267a:	18fc      	adds	r4, r7, r3
+ 800267c:	68bb      	ldr	r3, [r7, #8]
+ 800267e:	0018      	movs	r0, r3
+ 8002680:	f000 f82b 	bl	80026da <TMC5160_Check_SG_Result>
+ 8002684:	0003      	movs	r3, r0
+ 8002686:	8023      	strh	r3, [r4, #0]
 			CS_ACTUAL = TMC5160_Check_CS_Actual(DRV_STATUS);
- 8002678:	197c      	adds	r4, r7, r5
- 800267a:	68bb      	ldr	r3, [r7, #8]
- 800267c:	0018      	movs	r0, r3
- 800267e:	f000 f872 	bl	8002766 <TMC5160_Check_CS_Actual>
- 8002682:	0003      	movs	r3, r0
- 8002684:	8023      	strh	r3, [r4, #0]
+ 8002688:	2510      	movs	r5, #16
+ 800268a:	197c      	adds	r4, r7, r5
+ 800268c:	68bb      	ldr	r3, [r7, #8]
+ 800268e:	0018      	movs	r0, r3
+ 8002690:	f000 f869 	bl	8002766 <TMC5160_Check_CS_Actual>
+ 8002694:	0003      	movs	r3, r0
+ 8002696:	8023      	strh	r3, [r4, #0]
 
 			if(CS_ACTUAL == 0)
- 8002686:	197b      	adds	r3, r7, r5
- 8002688:	881b      	ldrh	r3, [r3, #0]
- 800268a:	2b00      	cmp	r3, #0
- 800268c:	d107      	bne.n	800269e <Drive_Enable+0xa6>
+ 8002698:	197b      	adds	r3, r7, r5
+ 800269a:	881b      	ldrh	r3, [r3, #0]
+ 800269c:	2b00      	cmp	r3, #0
+ 800269e:	d10a      	bne.n	80026b6 <Drive_Enable+0xbe>
 			{
+				Drive_Enable(0); // power down and reset
+ 80026a0:	2000      	movs	r0, #0
+ 80026a2:	f7ff ffa9 	bl	80025f8 <Drive_Enable>
 				HAL_NVIC_SystemReset();
- 800268e:	f002 fa5a 	bl	8004b46 <HAL_NVIC_SystemReset>
- 8002692:	e004      	b.n	800269e <Drive_Enable+0xa6>
+ 80026a6:	f002 fa4e 	bl	8004b46 <HAL_NVIC_SystemReset>
+ 80026aa:	e004      	b.n	80026b6 <Drive_Enable+0xbe>
 			}
 		}
 
 		else
 		{
 			Drive_Enable(0); // power down and reset
- 8002694:	2000      	movs	r0, #0
- 8002696:	f7ff ffaf 	bl	80025f8 <Drive_Enable>
+ 80026ac:	2000      	movs	r0, #0
+ 80026ae:	f7ff ffa3 	bl	80025f8 <Drive_Enable>
 			HAL_NVIC_SystemReset();
- 800269a:	f002 fa54 	bl	8004b46 <HAL_NVIC_SystemReset>
-			//TODO work in a restart/retry sequence before hardfault
+ 80026b2:	f002 fa48 	bl	8004b46 <HAL_NVIC_SystemReset>
 		}
 	}
 
 	if(state == 0) // disable drive
- 800269e:	687b      	ldr	r3, [r7, #4]
- 80026a0:	2b00      	cmp	r3, #0
- 80026a2:	d116      	bne.n	80026d2 <Drive_Enable+0xda>
+ 80026b6:	687b      	ldr	r3, [r7, #4]
+ 80026b8:	2b00      	cmp	r3, #0
+ 80026ba:	d10a      	bne.n	80026d2 <Drive_Enable+0xda>
 	{
 		HAL_GPIO_WritePin(GPIOA, DRV_ENN_Pin, 1); // HIGH = OFF
- 80026a4:	2380      	movs	r3, #128	; 0x80
- 80026a6:	0059      	lsls	r1, r3, #1
- 80026a8:	2390      	movs	r3, #144	; 0x90
- 80026aa:	05db      	lsls	r3, r3, #23
- 80026ac:	2201      	movs	r2, #1
- 80026ae:	0018      	movs	r0, r3
- 80026b0:	f002 fbef 	bl	8004e92 <HAL_GPIO_WritePin>
+ 80026bc:	2380      	movs	r3, #128	; 0x80
+ 80026be:	0059      	lsls	r1, r3, #1
+ 80026c0:	2390      	movs	r3, #144	; 0x90
+ 80026c2:	05db      	lsls	r3, r3, #23
+ 80026c4:	2201      	movs	r2, #1
+ 80026c6:	0018      	movs	r0, r3
+ 80026c8:	f002 fbe3 	bl	8004e92 <HAL_GPIO_WritePin>
 		HAL_Delay(10);
- 80026b4:	200a      	movs	r0, #10
- 80026b6:	f001 f961 	bl	800397c <HAL_Delay>
-
-		TMC5160_SPIWrite(0x04, 0x00000000, 0);
- 80026ba:	2200      	movs	r2, #0
- 80026bc:	2100      	movs	r1, #0
- 80026be:	2004      	movs	r0, #4
- 80026c0:	f000 f898 	bl	80027f4 <TMC5160_SPIWrite>
-		IOIN = TMC5160_SPIWrite(0x04, 0x00000000, 0); //Read (IOIN)
- 80026c4:	2200      	movs	r2, #0
- 80026c6:	2100      	movs	r1, #0
- 80026c8:	2004      	movs	r0, #4
- 80026ca:	f000 f893 	bl	80027f4 <TMC5160_SPIWrite>
- 80026ce:	0003      	movs	r3, r0
- 80026d0:	60fb      	str	r3, [r7, #12]
-		else if(IOIN & (1 << 4))
-		{
-			DRV_ENN == 1;
-		}
+ 80026cc:	200a      	movs	r0, #10
+ 80026ce:	f001 f955 	bl	800397c <HAL_Delay>
 	}
 }
  80026d2:	46c0      	nop			; (mov r8, r8)
