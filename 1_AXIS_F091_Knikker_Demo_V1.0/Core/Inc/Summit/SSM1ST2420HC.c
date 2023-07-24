@@ -285,15 +285,41 @@ void TMC5160_Stop(void)
 void Drive_Enable(int state)
 {
 	uint32_t DRV_STATUS;
+	uint32_t IOIN;
+	uint16_t CS_ACTUAL;
+	uint16_t SG_RESULT;
 
 	if(state == 1) // Enable driver
 	{
 		HAL_GPIO_WritePin(GPIOA, DRV_ENN_Pin, 0); // LOW = ON
 		HAL_Delay(10);
 
+		TMC5160_SPIWrite(0x04, 0x00000000, 0);
+		IOIN = TMC5160_SPIWrite(0x04, 0x00000000, 0); //Read (IOIN)
+
+		if(IOIN & (0 << 4)) //if DRV_ENN == 0 power stage is on
+		{
+			  // init it ok
+		}
+
+		else
+		{
+			HardFault_Handler(); //TODO work in a restart/retry sequence before hardfault
+		}
+
 		TMC5160_SPIWrite(0x6F, 0x00000000, 0);
 		DRV_STATUS = TMC5160_SPIWrite(0x6F, 0x00000000, 0); //Read (DRV_STATUS)
 
+		//TODO: read CS_Actual and SG_result to check if motor is enabled
+
+		if(SG_RESULT <= 0 && CS_ACTUAL <= 0)
+		{
+			//motor did not turn on correctly
+
+		}
+
+
+		/*
 		if(DRV_STATUS & (0 << 20) && DRV_STATUS & (0 << 19) && DRV_STATUS & (0 << 18) && DRV_STATUS & (0 << 17) && DRV_STATUS & (0 << 16))
 		{
 			//issue with Init.
@@ -303,7 +329,7 @@ void Drive_Enable(int state)
 			HAL_Delay(300);
 
 			HAL_NVIC_SystemReset(); // risky should not be in final code
-		}
+		} */
 	}
 
 
@@ -311,6 +337,7 @@ void Drive_Enable(int state)
 	{
 		HAL_GPIO_WritePin(GPIOA, DRV_ENN_Pin, 1); // HIGH = OFF
 		HAL_Delay(10);
+
 
 		TMC5160_SPIWrite(0x6F, 0x00000000, 0);
 		DRV_STATUS = TMC5160_SPIWrite(0x6F, 0x00000000, 0); //Read (DRV_STATUS)

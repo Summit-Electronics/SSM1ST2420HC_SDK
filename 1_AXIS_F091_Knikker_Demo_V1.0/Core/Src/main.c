@@ -101,8 +101,6 @@ uint16_t currentposition = 0;
 uint16_t open_pos = 0;
 uint16_t closed_pos = 0;
 
-//test 12-7-23
-
 /*  CAN RECEIVE INTERRUPT */
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {
@@ -186,7 +184,7 @@ int main(void)
   HAL_Delay(100);
   HAL_GPIO_WritePin(GPIOB,EXT_OUT_2_Pin,1);
 
-  HAL_GPIO_WritePin(GPIOB,EXT_OUT_1_Pin,0); // male sure PLC waits
+  HAL_GPIO_WritePin(GPIOB,EXT_OUT_1_Pin,0); // make sure PLC waits
 
   Drive_Enable(1); // enable driver
 
