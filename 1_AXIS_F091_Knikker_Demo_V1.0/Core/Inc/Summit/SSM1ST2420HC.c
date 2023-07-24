@@ -286,18 +286,20 @@ void Drive_Enable(int state)
 	uint32_t IOIN;
 	uint16_t SG_RESULT = 0;
 	uint16_t CS_ACTUAL = 0;
+	int DRV_ENN = 0;
 
 	if(state == 1) // Enable driver
 	{
 		HAL_GPIO_WritePin(GPIOA, DRV_ENN_Pin, 0); // LOW = ON
-		HAL_Delay(20);
+		HAL_Delay(10);
 
 		TMC5160_SPIWrite(0x04, 0x00000000, 0);
 		IOIN = TMC5160_SPIWrite(0x04, 0x00000000, 0); //Read (IOIN)
 
-		if(IOIN & (0 << 4)) //if DRV_ENN == 0 power stage is on
+		DRV_ENN = IOIN & (0 << 4);
+
+		if(DRV_ENN == 0) //if DRV_ENN == 0 power stage is on
 		{
-			// init it ok
 			TMC5160_SPIWrite(0x6F, 0x00000000, 0);
 			DRV_STATUS = TMC5160_SPIWrite(0x6F, 0x00000000, 0); //Read (DRV_STATUS)
 
@@ -323,6 +325,18 @@ void Drive_Enable(int state)
 	{
 		HAL_GPIO_WritePin(GPIOA, DRV_ENN_Pin, 1); // HIGH = OFF
 		HAL_Delay(10);
+
+		TMC5160_SPIWrite(0x04, 0x00000000, 0);
+		IOIN = TMC5160_SPIWrite(0x04, 0x00000000, 0); //Read (IOIN)
+
+		if(IOIN & (0 << 4))
+		{
+			DRV_ENN == 0;
+		}
+		else if(IOIN & (1 << 4))
+		{
+			DRV_ENN == 1;
+		}
 	}
 }
 
