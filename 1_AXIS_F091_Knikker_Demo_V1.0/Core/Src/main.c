@@ -136,7 +136,7 @@ int main(void)
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
 
-  HAL_Init();
+-  HAL_Init();
 
   /* USER CODE BEGIN Init */
 
@@ -222,7 +222,7 @@ int main(void)
 
   Open = 0;
   open_pos = 0;
-  closed_pos = 13800;
+  closed_pos = 13900;
 
   Drive_Enable(1); // enable driver
   TMC5160_Rotate_To(closed_pos,&Ramp1); // close
