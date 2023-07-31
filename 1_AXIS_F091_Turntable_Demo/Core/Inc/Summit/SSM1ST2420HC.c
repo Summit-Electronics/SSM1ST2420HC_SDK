@@ -6,7 +6,7 @@
  *      Email: wesley@top-electronics.com
  */
 #include "SSM1ST2420HC.h"
-//#include <math.h>
+#include <math.h>
 
 uint16_t AMSoffset = 0;
 uint32_t SG_RESULTS[1000];
@@ -17,8 +17,6 @@ int Standstill = 0;
 int SG2_trigger = 0;
 int Driver_error = 0;
 int Reset_error = 0;
-
-
 
 void TMC5160_Basic_Init(CurrentConfig *Current)
 {
@@ -285,36 +283,106 @@ void TMC5160_Stop(void)
 void Drive_Enable(int state)
 {
 	uint32_t DRV_STATUS;
+	uint32_t IOIN;
+	uint16_t SG_RESULT = 0;
+	uint16_t CS_ACTUAL = 0;
+	int DRV_ENN = 0;
 
 	if(state == 1) // Enable driver
 	{
 		HAL_GPIO_WritePin(GPIOA, DRV_ENN_Pin, 0); // LOW = ON
 		HAL_Delay(10);
 
-		TMC5160_SPIWrite(0x6F, 0x00000000, 0);
-		DRV_STATUS = TMC5160_SPIWrite(0x6F, 0x00000000, 0); //Read (DRV_STATUS)
+		TMC5160_SPIWrite(0x04, 0x00000000, 0);
+		IOIN = TMC5160_SPIWrite(0x04, 0x00000000, 0); //Read (IOIN)
 
-		if(DRV_STATUS & (0 << 20) && DRV_STATUS & (0 << 19) && DRV_STATUS & (0 << 18) && DRV_STATUS & (0 << 17) && DRV_STATUS & (0 << 16))
+		if(IOIN & (1 << 4))
 		{
-			//issue with Init.
-			HAL_GPIO_WritePin(GPIOB, EXT_OUT_2_Pin, 0);
-			HAL_Delay(300);
-			HAL_GPIO_WritePin(GPIOB, EXT_OUT_2_Pin, 1);
-			HAL_Delay(300);
+			DRV_ENN = 1;
+		}
 
-			HAL_NVIC_SystemReset(); // risky should not be in final code
+		else
+		{
+			DRV_ENN = 0;
+		}
+
+		if(DRV_ENN == 0) //if DRV_ENN == 0 power stage is on
+		{
+			TMC5160_SPIWrite(0x6F, 0x00000000, 0);
+			DRV_STATUS = TMC5160_SPIWrite(0x6F, 0x00000000, 0); //Read (DRV_STATUS)
+
+			SG_RESULT = TMC5160_Check_SG_Result(DRV_STATUS);
+			CS_ACTUAL = TMC5160_Check_CS_Actual(DRV_STATUS);
+
+			if(CS_ACTUAL == 0)
+			{
+				Drive_Enable(0); // power down and reset
+				TMC5160_Stop();
+
+				  //TODO remove in final code
+				  HAL_GPIO_WritePin(GPIOB,EXT_OUT_2_Pin,0);
+				  HAL_Delay(100);
+				  HAL_GPIO_WritePin(GPIOB,EXT_OUT_2_Pin,1);
+				  HAL_Delay(100);
+				  HAL_GPIO_WritePin(GPIOB,EXT_OUT_2_Pin,0);
+				  HAL_Delay(100);
+				  HAL_GPIO_WritePin(GPIOB,EXT_OUT_2_Pin,1);
+				  HAL_Delay(100);
+
+				  HAL_NVIC_SystemReset();
+			}
+		}
+
+		else
+		{
+			Drive_Enable(0); // power down and reset
+			HAL_NVIC_SystemReset();
 		}
 	}
-
 
 	if(state == 0) // disable drive
 	{
 		HAL_GPIO_WritePin(GPIOA, DRV_ENN_Pin, 1); // HIGH = OFF
 		HAL_Delay(10);
-
-		TMC5160_SPIWrite(0x6F, 0x00000000, 0);
-		DRV_STATUS = TMC5160_SPIWrite(0x6F, 0x00000000, 0); //Read (DRV_STATUS)
 	}
+}
+
+uint16_t TMC5160_Check_SG_Result(uint32_t DRV_STATUS_Register)
+{
+	uint16_t SG_RESULT = 0;
+	int x,y = 0;
+
+	//check for SG_Result
+	for(x = 0; x <10; x++)
+	{
+		if(DRV_STATUS_Register & (1 << x))
+		{
+			SG_RESULT += (pow(2,y));
+		}
+
+		y++;
+	}
+
+	return SG_RESULT;
+}
+
+uint16_t TMC5160_Check_CS_Actual(uint32_t DRV_STATUS_Register)
+{
+	uint16_t CS_ACTUAL = 0;
+	int x,y = 0;
+
+	//check for CS_actual
+	for(x = 16; x <21; x++)
+	{
+		if(DRV_STATUS_Register & (1 << x))
+		{
+			CS_ACTUAL += (pow(2,y));
+		}
+
+		y++;
+	}
+
+	return CS_ACTUAL;
 }
 
 
@@ -403,6 +471,7 @@ void TMC5160_Fault_monitor(void)
 	if (Critical_error == 1) {
 
 		//signal error occured (only on 1_axis_demo code)
+		//TODO remove signalling in final code
 		HAL_GPIO_WritePin(GPIOB, EXT_OUT_2_Pin, 0);
 		HAL_Delay(300);
 		HAL_GPIO_WritePin(GPIOB, EXT_OUT_2_Pin, 1);
@@ -415,7 +484,7 @@ void TMC5160_Fault_monitor(void)
 		TMC5160_Stop();
 		Drive_Enable(0);
 
-		HAL_NVIC_SystemReset(); // risky should not be in final code
+		HAL_NVIC_SystemReset(); // TODO: risky should not be in final code
 	}
 
 	else
