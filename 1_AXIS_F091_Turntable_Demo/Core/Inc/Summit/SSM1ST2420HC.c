@@ -320,6 +320,7 @@ void Drive_Enable(int state)
 				TMC5160_Stop();
 
 				  //TODO remove in final code
+				/*
 				  HAL_GPIO_WritePin(GPIOB,EXT_OUT_2_Pin,0);
 				  HAL_Delay(100);
 				  HAL_GPIO_WritePin(GPIOB,EXT_OUT_2_Pin,1);
@@ -328,7 +329,7 @@ void Drive_Enable(int state)
 				  HAL_Delay(100);
 				  HAL_GPIO_WritePin(GPIOB,EXT_OUT_2_Pin,1);
 				  HAL_Delay(100);
-
+				 */
 				  HAL_NVIC_SystemReset();
 			}
 		}
@@ -472,6 +473,7 @@ void TMC5160_Fault_monitor(void)
 
 		//signal error occured (only on 1_axis_demo code)
 		//TODO remove signalling in final code
+		/*
 		HAL_GPIO_WritePin(GPIOB, EXT_OUT_2_Pin, 0);
 		HAL_Delay(300);
 		HAL_GPIO_WritePin(GPIOB, EXT_OUT_2_Pin, 1);
@@ -480,6 +482,7 @@ void TMC5160_Fault_monitor(void)
 		HAL_Delay(300);
 		HAL_GPIO_WritePin(GPIOB, EXT_OUT_2_Pin, 1);
 		HAL_Delay(300);
+		*/
 
 		TMC5160_Stop();
 		Drive_Enable(0);

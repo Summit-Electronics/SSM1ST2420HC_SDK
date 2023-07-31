@@ -92,10 +92,9 @@ int STG_ENB = 0; // 0 = disable Stallguard, 1 = enable Stallguard
 // temp val for GPIO test
 int Readin2 = 0;
 int Number_Of_Steps = 0;
+int Axis_init = 0;
 
 uint32_t Steps[12] = {4267, 8533, 12800, 17067, 21333, 25600, 29867, 34133, 38400, 42667, 46933, 51200};
-
-//test 5-7-23
 
 /*  CAN RECEIVE INTERRUPT */
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
@@ -200,8 +199,23 @@ int main(void)
   TMC5160_SPIWrite(0x21, 0x00000000, 1);// writing value to address 24 = 0x2D(XTARGET)  1 lap
   Drive_Enable(1); // enable driver
 
+  // Wacht op signaal 1_axis
+
+  while(Axis_init == 0)
+  {
+	  if(Read_IN(2) == 1) //Wait for 1_AXIS signal to start
+	  {
+		  while(Read_IN(2) == 0)
+		  {
+		  }
+
+		  HAL_Delay(100);
+		  Axis_init = 1;
+	  }
+  }
+
   //test movement
-  TMC5160_Rotate_To(1000, &Ramp1);
+  TMC5160_Rotate_To(4267, &Ramp1);
 
 
   /* USER CODE END 2 */

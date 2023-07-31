@@ -100,6 +100,9 @@ uint32_t stallcounter = 0;
 uint16_t currentposition = 0;
 uint16_t open_pos = 0;
 uint16_t closed_pos = 0;
+int Raspi_Init = 0;
+int PLC_Init = 0;
+
 
 /*  CAN RECEIVE INTERRUPT */
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
@@ -136,7 +139,7 @@ int main(void)
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
 
--  HAL_Init();
+  HAL_Init();
 
   /* USER CODE BEGIN Init */
 
@@ -214,10 +217,6 @@ int main(void)
   TMC5160_SPIWrite(0x21, 0x00000000, 1);// writing value to address 24 = 0x2D(XTARGET)  1 lap
   TMC5160_Rotate_To(0, &Ramp1);
 
-  HAL_GPIO_WritePin(GPIOB,EXT_OUT_2_Pin,0);
-  HAL_Delay(100);
-  HAL_GPIO_WritePin(GPIOB,EXT_OUT_2_Pin,1);
-
   HAL_Delay(1500);
 
   Open = 0;
@@ -234,45 +233,39 @@ int main(void)
 	  Marbles[m] = 0;
   }
 
-  // signal Raspi in case raspi is already powered
-  HAL_GPIO_WritePin(GPIOB,EXT_OUT_2_Pin,0);
-  HAL_Delay(200);
-  HAL_GPIO_WritePin(GPIOB,EXT_OUT_2_Pin,1);
-
-  while(Read_IN(2) == 1) //Wait for RASPI signal to start
+  while(Raspi_Init == 0) //wait for raspi init
   {
+	  HAL_GPIO_WritePin(GPIOB,EXT_OUT_2_Pin,0);
+  	  HAL_Delay(100);
+  	  HAL_GPIO_WritePin(GPIOB,EXT_OUT_2_Pin,1);
+
+  	  if(Read_IN(2) == 1) //Wait for RASPI signal to start
+  	  {
+  	  	  while(Read_IN(2) == 0) //Wait for RASPI signal to start
+  	  	  {
+  	  	  }
+
+  	  	  HAL_Delay(3000);
+  	  	  Raspi_Init = 1;
+  	  }
   }
 
-  while(Read_IN(2) == 0) //Wait for RASPI signal to start
+  while(PLC_Init == 0)
   {
+	  HAL_GPIO_WritePin(GPIOB,EXT_OUT_1_Pin,1);
+	  HAL_Delay(100);
+	  HAL_GPIO_WritePin(GPIOB,EXT_OUT_1_Pin,0);
+
+  	  if(Read_IN(1) == 1) //Wait for PLC signal that marble is in place
+  	  {
+  		  while(Read_IN(1) == 0) // wait for it to toggle low
+  		  {
+  		  }
+
+  		  HAL_Delay(1000);
+  		  PLC_Init = 1;
+  	  }
   }
-
-  HAL_GPIO_WritePin(GPIOB,EXT_OUT_2_Pin,1);
-
-  //TODO: dit ombouwen (2 verschillende wachtondities binnen 1 sec?? )
-  /*
-  //wait condition when Raspi is not initialized
-  while(Read_IN(2) == 1) //Wait for RASPI signal to start
-  {
-  }
-
-  HAL_Delay(1000);
-
-  //wait condition after Raspi is initialized
-  while(Read_IN(2) == 0) //Wait for RASPI signal to start
-  {
-  }
-*/
-
-//signal PLC to start
-  HAL_GPIO_WritePin(GPIOB,EXT_OUT_1_Pin,1);
-  HAL_Delay(1000);
-  HAL_GPIO_WritePin(GPIOB,EXT_OUT_1_Pin,0);
-
-
-
- // HAL_GPIO_WritePin(GPIOA, DRV_ENN_Pin, 0); // LOW = ON
- // HAL_Delay(10);
 
   /* USER CODE END 2 */
 
