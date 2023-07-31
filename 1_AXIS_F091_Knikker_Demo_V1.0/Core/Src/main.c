@@ -245,6 +245,10 @@ int main(void)
   	  	  {
   	  	  }
 
+  		  HAL_GPIO_WritePin(GPIOB,EXT_OUT_2_Pin,0);
+  	  	  HAL_Delay(100);
+  	  	  HAL_GPIO_WritePin(GPIOB,EXT_OUT_2_Pin,1);
+
   	  	  HAL_Delay(3000);
   	  	  Raspi_Init = 1;
   	  }

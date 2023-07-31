@@ -211,6 +211,10 @@ int main(void)
 
 		  HAL_Delay(100);
 		  Axis_init = 1;
+
+		  HAL_GPIO_WritePin(GPIOB,EXT_OUT_2_Pin,1);
+		  HAL_Delay(500);
+		  HAL_GPIO_WritePin(GPIOB,EXT_OUT_2_Pin,0);
 	  }
   }
 
@@ -233,7 +237,6 @@ int main(void)
 	  }
 
 	  TMC5160_Rotate_To(Steps[Number_Of_Steps], &Ramp1); // move to Position X
-	  //HAL_Delay(1000); // to add runtime
 
 	  Number_Of_Steps++;
 
