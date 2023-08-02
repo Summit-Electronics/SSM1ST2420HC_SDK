@@ -314,7 +314,7 @@ void Drive_Enable(int state)
 			SG_RESULT = TMC5160_Check_SG_Result(DRV_STATUS);
 			CS_ACTUAL = TMC5160_Check_CS_Actual(DRV_STATUS);
 
-			if(CS_ACTUAL == 0)
+			if(CS_ACTUAL == 0 || CS_ACTUAL >= 5)
 			{
 				Drive_Enable(0); // power down and reset
 				TMC5160_Stop();

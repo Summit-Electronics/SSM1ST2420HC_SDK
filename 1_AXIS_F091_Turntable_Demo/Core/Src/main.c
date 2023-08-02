@@ -219,8 +219,9 @@ int main(void)
   }
 
   //test movement
+  TMC5160_Rotate_To(0, &Ramp1);
+  HAL_Delay(100);
   TMC5160_Rotate_To(4267, &Ramp1);
-
 
   /* USER CODE END 2 */
 
