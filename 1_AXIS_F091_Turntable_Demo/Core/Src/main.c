@@ -158,12 +158,12 @@ int main(void)
   HAL_Delay(2500);	//startup delay, so motor does not spin on debug
 
   Ramp1.VSTART 	= 10;
-  Ramp1.A1 		= 1000;
-  Ramp1.V1 		= 10000;
-  Ramp1.AMAX 	= 12800;
-  Ramp1.VMAX 	= 12800;
-  Ramp1.DMAX 	= 700;
-  Ramp1.D1 		= 1400;
+  Ramp1.A1 		= 1000;   //1000
+  Ramp1.V1 		= 10000;  //10000
+  Ramp1.AMAX 	= 12800; //12800
+  Ramp1.VMAX 	= 12800; //12800
+  Ramp1.DMAX 	= 700;	 //700
+  Ramp1.D1 		= 1400;  //1400
   Ramp1.VSTOP 	= 10;
 
   StallSettings1.VSTART = 10;
@@ -219,9 +219,8 @@ int main(void)
   }
 
   //test movement
-  TMC5160_Rotate_To(0, &Ramp1);
-  HAL_Delay(100);
   TMC5160_Rotate_To(4267, &Ramp1);
+  HAL_Delay(100);
 
   /* USER CODE END 2 */
 
