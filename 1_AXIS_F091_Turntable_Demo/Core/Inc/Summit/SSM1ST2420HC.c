@@ -98,7 +98,6 @@ void TMC5160_Init_Stealthchop(void)
 	TMC5160_SPIWrite(0x00, 0x0000000C, 1); //enable PWM
 	TMC5160_SPIWrite(0x70, 0xC40C011E, 1); //enable PWM autoscale
 	TMC5160_SPIWrite(0x35, 0x00000040, 1); //0x35(RAMP_STAT)
-
 	//TODO: finilize
 }
 
