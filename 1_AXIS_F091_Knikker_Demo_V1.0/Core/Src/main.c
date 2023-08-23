@@ -166,7 +166,6 @@ int main(void)
 
   TMC5160_Stop();
   Drive_Enable(0);
-
   HAL_Delay(2500);			//startup delay, so motor does not spin on debug
 
   Ramp1.VSTART 	= 10;		//Motor Start speed

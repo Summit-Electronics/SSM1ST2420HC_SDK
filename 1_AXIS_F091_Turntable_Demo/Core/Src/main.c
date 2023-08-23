@@ -155,6 +155,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
 
   TMC5160_Stop();
+  Drive_Enable(0);
   HAL_Delay(2500);	//startup delay, so motor does not spin on debug
 
   Ramp1.VSTART 	= 10;
@@ -194,10 +195,12 @@ int main(void)
 		TMC5160_Init_Stallguard(0);
 	}
 
-  Drive_Enable(0); // disable driver
-  HAL_Delay(1000);
   TMC5160_SPIWrite(0x21, 0x00000000, 1);// writing value to address 24 = 0x2D(XTARGET)  1 lap
   Drive_Enable(1); // enable driver
+
+  //test movement
+  TMC5160_Rotate_To(4267, &Ramp1);
+  HAL_Delay(100);
 
   // Wacht op signaal 1_axis
 
@@ -217,10 +220,6 @@ int main(void)
 		  HAL_GPIO_WritePin(GPIOB,EXT_OUT_2_Pin,0);
 	  }
   }
-
-  //test movement
-  TMC5160_Rotate_To(4267, &Ramp1);
-  HAL_Delay(100);
 
   /* USER CODE END 2 */
 
