@@ -64,8 +64,6 @@ static void MX_SPI2_Init(void);
 
 /* RAMP config */
 RampConfig Ramp1;
-RampConfig StallSettings1;
-RampConfig StealthSettings1;
 RampConfig StopRamp1;
 
 /* Current config */
@@ -135,7 +133,7 @@ int main(void)
 
   /* USER CODE BEGIN Init */
 
-	HAL_Delay(2000);
+	//HAL_Delay(1000);
 
   /* USER CODE END Init */
 
@@ -156,7 +154,7 @@ int main(void)
 
   TMC5160_Stop();
   Drive_Enable(0);
-  HAL_Delay(2500);	//startup delay, so motor does not spin on debug
+  HAL_Delay(6000);	//startup delay to charge caps
 
   Ramp1.VSTART 	= 10;
   Ramp1.A1 		= 1000;   //1000
@@ -167,33 +165,10 @@ int main(void)
   Ramp1.D1 		= 1400;  //1400
   Ramp1.VSTOP 	= 10;
 
-  StallSettings1.VSTART = 10;
-  StallSettings1.AMAX 	= 51200;
-  StallSettings1.VMAX 	= 102400; // 2 RPS
-  StallSettings1.VSTOP 	= 10;
-
-  StealthSettings1.VSTART 	= 10;
-  StealthSettings1.AMAX 	= 2000;
-  StealthSettings1.VMAX 	= 5000;
-  StealthSettings1.VSTOP 	= 10;
-
   CurrentSetting1.IHOLD = 5;
   CurrentSetting1.IRUN 	= 15;
 
   TMC5160_Basic_Init(&CurrentSetting1);
-
-  //TMC5160_Init_Stealthchop();
-
-  if(AMS_ENB == 1)
-  {
-	  AMS5055_Basic_Init();
-  }
-
-  if (STG_ENB == 1) {
-		TMC5160_Basic_Rotate(1, &StallSettings1); //Stallguard example basic movement started
-		//if motor does not spin, Stallguard is triggered, adding a delay before init will fix it.
-		TMC5160_Init_Stallguard(0);
-	}
 
   TMC5160_SPIWrite(0x21, 0x00000000, 1);// writing value to address 24 = 0x2D(XTARGET)  1 lap
   Drive_Enable(1); // enable driver

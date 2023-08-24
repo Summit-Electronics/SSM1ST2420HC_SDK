@@ -143,7 +143,7 @@ int main(void)
 
   /* USER CODE BEGIN Init */
 
-  HAL_Delay(2000); //delay to allow crystal to wake up.
+  HAL_Delay(1000); //delay to allow caps to charge
 
   /* USER CODE END Init */
 
@@ -166,7 +166,6 @@ int main(void)
 
   TMC5160_Stop();
   Drive_Enable(0);
-  HAL_Delay(2500);			//startup delay, so motor does not spin on debug
 
   Ramp1.VSTART 	= 10;		//Motor Start speed
   Ramp1.A1 		= 1000;		//Motor Accelaration from Vstart to speed V1
@@ -232,6 +231,8 @@ int main(void)
 	  Marbles[m] = 0;
   }
 
+  HAL_Delay(5000);
+
   while(Raspi_Init == 0) //wait for raspi init
   {
 	  HAL_GPIO_WritePin(GPIOB,EXT_OUT_2_Pin,0);
@@ -269,6 +270,8 @@ int main(void)
   		  PLC_Init = 1;
   	  }
   }
+
+  //HAL_Delay(5000); //wait 5 sec before starting loop
 
   /* USER CODE END 2 */
 

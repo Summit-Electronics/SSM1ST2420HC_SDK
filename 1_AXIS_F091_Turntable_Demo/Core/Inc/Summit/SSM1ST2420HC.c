@@ -318,18 +318,7 @@ void Drive_Enable(int state)
 				Drive_Enable(0); // power down and reset
 				TMC5160_Stop();
 
-				  //TODO remove in final code
-				/*
-				  HAL_GPIO_WritePin(GPIOB,EXT_OUT_2_Pin,0);
-				  HAL_Delay(100);
-				  HAL_GPIO_WritePin(GPIOB,EXT_OUT_2_Pin,1);
-				  HAL_Delay(100);
-				  HAL_GPIO_WritePin(GPIOB,EXT_OUT_2_Pin,0);
-				  HAL_Delay(100);
-				  HAL_GPIO_WritePin(GPIOB,EXT_OUT_2_Pin,1);
-				  HAL_Delay(100);
-				 */
-				  HAL_NVIC_SystemReset();
+				HAL_NVIC_SystemReset();
 			}
 		}
 
