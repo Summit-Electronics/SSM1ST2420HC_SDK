@@ -93,18 +93,29 @@ static void MX_SPI2_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
+/* RAMP config */
+RampConfig Ramp1;
+RampConfig StallSettings1;
+RampConfig StealthSettings1;
+RampConfig StopRamp1;
+
+/* Current config */
+CurrentConfig CurrentSetting1;
+
+/* Settings */
+int AMS_ENB = 0; // 0 = disable Hall sensor , 1 = enable Hall sensor
+int ENC_ENB = 0; // 0 = disable Encoder , 1 = enable Encoder
+int STG_ENB = 0; // 0 = disable Stallguard, 1 = enable Stallguard
+
+/* CAN VARIABLES */  //
 CAN_TxHeaderTypeDef CANTxHeader;
 CAN_RxHeaderTypeDef CANRxHeader;
 
-uint8_t CANTxData[8];	//TX data array CAN
-uint8_t CANRxData[8];	//RX data array CAN
-uint8_t	SPI1TxData[8];	//TX data array SPI1
-uint8_t SPI1RxData[8];	//RX data array SPI1
-uint8_t SPI2TxData[8];  //TX data array SPI2
-uint8_t SPI2RxData[8];  //RX data array SPI2
-int Datacheck;
-int count = 0;
-uint32_t TxMailbox[3];		//CAN Mailbox
+uint8_t CANTxData[8];	//CANTX data array
+uint8_t CANRxData[8];	//CANRX data array
+uint32_t TxMailbox[3];	//CAN Mailbox
+int Datacheck;			//temp value for checking incomming CAN Data
+
 
 
 /*  CAN RECEIVE INTERRUPT */

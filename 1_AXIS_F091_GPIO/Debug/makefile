@@ -1,6 +1,6 @@
 ################################################################################
 # Automatically-generated file. Do not edit!
-# Toolchain: GNU Tools for STM32 (10.3-2021.10)
+# Toolchain: GNU Tools for STM32 (11.3.rel1)
 ################################################################################
 
 -include ../makefile.init
@@ -12,9 +12,7 @@ RM := rm -rf
 -include Drivers/STM32F0xx_HAL_Driver/Src/subdir.mk
 -include Core/Startup/subdir.mk
 -include Core/Src/subdir.mk
--include Core/Inc/tmc/ramp/subdir.mk
--include Core/Inc/tmc/ic/TMC5160/subdir.mk
--include Core/Inc/tmc/helpers/subdir.mk
+-include Core/Inc/Summit/subdir.mk
 -include objects.mk
 
 ifneq ($(MAKECMDGOALS),clean)

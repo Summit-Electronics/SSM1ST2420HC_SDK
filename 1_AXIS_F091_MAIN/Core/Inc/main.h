@@ -32,8 +32,6 @@ extern "C" {
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "SSM1ST2420HC.h"
-//#include "tmc/ic/TMC5160/TMC5160.h"
-//TODO: remove tmc library
 
 /* USER CODE END Includes */
 

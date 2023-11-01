@@ -28,7 +28,9 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
  ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_pwr.h \
  ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_pwr_ex.h \
  ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_spi.h \
- ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_spi_ex.h
+ ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_spi_ex.h \
+ C:/Github_Local/SSM1ST2420HC/1_AXIS_F091_Send/Core/Inc/Summit/SSM1ST2420HC.h \
+ C:/Github_Local/SSM1ST2420HC/1_AXIS_F091_Send/Core/Inc/Summit/AS5055A_Registers.h
 ../Core/Inc/main.h:
 ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal.h:
 ../Core/Inc/stm32f0xx_hal_conf.h:
@@ -60,3 +62,5 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
 ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_pwr_ex.h:
 ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_spi.h:
 ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_spi_ex.h:
+C:/Github_Local/SSM1ST2420HC/1_AXIS_F091_Send/Core/Inc/Summit/SSM1ST2420HC.h:
+C:/Github_Local/SSM1ST2420HC/1_AXIS_F091_Send/Core/Inc/Summit/AS5055A_Registers.h:

@@ -67,8 +67,6 @@ Once the IC configuration is completed, you can use tmcXXXX_readInt() and tmcXXX
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "tmc/ic/TMC5160/TMC5160.h"
-#include "AS5055A_Registers.h"
 //#include "SSM1ST2420HC.c"
 
 /* USER CODE END Includes */
@@ -96,7 +94,6 @@ SPI_HandleTypeDef hspi1;
 SPI_HandleTypeDef hspi2;
 
 /* USER CODE BEGIN PV */
-TMC5160TypeDef h5160;
 
 /* USER CODE END PV */
 
@@ -108,33 +105,18 @@ static void MX_CAN_Init(void);
 static void MX_SPI1_Init(void);
 static void MX_SPI2_Init(void);
 /* USER CODE BEGIN PFP */
-
-void TMC5160_Basic_Init(void);
-void TMC5160_Basic_Rotate(uint8_t Mode);
-void TMC5160_Rotate_To(uint32_t Position);
-void TMC5160_Stop(void);
-uint32_t TMC5160_SPIWrite(uint8_t Adress, uint32_t Value, int Action);
-
-void AMS5055_Basic_Init(void);
-uint16_t AMS5055_SPIWriteInt(uint16_t Adress, int Action);
-uint16_t AMS5055_Get_Position(void);
-uint8_t AMSParity(uint16_t value);
-void AMS_Delay(uint32_t Delay);
-
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
+RampConfig Ramp1;
 
-CAN_TxHeaderTypeDef CANTxHeader;
-CAN_RxHeaderTypeDef CANRxHeader;
-ConfigurationTypeDef configHeader;
+/* Current config */
+CurrentConfig CurrentSetting1;
 
-uint8_t CANTxData[8];	//TX data array CAN
-uint8_t CANRxData[8];	//RX data array CAN
-uint32_t TxMailbox[3];		//CAN Mailbox
 
+/*
 // SPI1 = AS5055A 16 bit data
 uint8_t SPI1TxData[2];	//TX data array SPI1
 uint8_t SPI1RxData[2];	//RX data array SPI1
@@ -142,18 +124,24 @@ uint16_t SPI1Rx = 0;
 uint16_t SPI1Tx = 0;
 uint16_t Angle;
 uint16_t Error;
-uint16_t Angles[2000];
 
-// SPI2 = TMC5160 40 bit data
-uint8_t SPI2TxData[5];  //TX data array SPI2
-uint8_t SPI2RxData[5];  //RX data array SPI2
-uint32_t SPI2Rx = 0;
-
-uint8_t AMS_Ready;
-int Datacheck;
 int count = 0;
-int Ax = 0;
-int x;
+*/
+
+
+/* Settings */
+int AMS_ENB = 0; // 0 = disable Hall sensor , 1 = enable Hall sensor
+int ENC_ENB = 0; // 0 = disable Encoder , 1 = enable Encoder
+int STG_ENB = 0; // 0 = disable Stallguard, 1 = enable Stallguard
+
+/* CAN VARIABLES */  //
+CAN_TxHeaderTypeDef CANTxHeader;
+CAN_RxHeaderTypeDef CANRxHeader;
+
+uint8_t CANTxData[8];	//CANTX data array
+uint8_t CANRxData[8];	//CANRX data array
+uint32_t TxMailbox[3];	//CAN Mailbox
+int Datacheck;			//temp value for checking incomming CAN Data
 
 
 /*  CAN RECEIVE INTERRUPT */
@@ -185,8 +173,6 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-	int h = 0;
-	uint32_t Enc_Position[500];
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -217,21 +203,35 @@ int main(void)
   HAL_GPIO_WritePin(GPIOA,DRV_ENN_Pin,1); // LOW = ON
   HAL_Delay(2500);	//startup delay, so motor does not spin on debug
 
+  Ramp1.VSTART 	= 10;
+  Ramp1.A1 		= 1000;
+  Ramp1.V1 		= 10000;
+  Ramp1.AMAX 	= 12800;
+  Ramp1.VMAX 	= 51200;
+  Ramp1.DMAX 	= 700;
+  Ramp1.D1 		= 1400;
+  Ramp1.VSTOP 	= 10;
+
+  CurrentSetting1.IHOLD = 3;
+  CurrentSetting1.IRUN 	= 1;
+
+  int h = 0;
+  uint32_t Enc_Position[500];
+
   HAL_GPIO_WritePin(GPIOB,TMC_CS_Pin,1); // set TMC CS high
   HAL_GPIO_WritePin(GPIOA,AMS_CS_Pin,1); // set TMC CS low
 
   /* Perform Basic Init of TMC5160 and AMS5055 */
-  TMC5160_Basic_Init();
+  TMC5160_Basic_Init(&CurrentSetting1);
   AMS5055_Basic_Init();
 
-  /* Enable DRV stage*/
-  HAL_GPIO_WritePin(GPIOA,DRV_ENN_Pin,0); // LOW = ON
-  HAL_Delay(10);
+  Drive_Enable(1); // enable driver
 
-  //TMC5160_Rotate_To(51200); // move to Position X
+  TMC5160_Rotate_To(51200, &Ramp1); // move to Position X
+  TMC5160_Rotate_To(0, &Ramp1); // move to Position X
 
-  HAL_GPIO_WritePin(GPIOA,DRV_ENN_Pin,1); // LOW = ON
   TMC5160_Stop();
+  Drive_Enable(0);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -542,273 +542,6 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-/*
-void tmc5160_readWriteArray(uint8_t channel, uint8_t *data, size_t length)
-{
-	HAL_GPIO_WritePin(GPIOB, TMC_CS_Pin, 0);
-	//HAL_SPI_TransmitReceive(SPI_HandleTypeDef *hspi, uint8_t *pTxData, uint8_t *pRxData, uint16_t Size,uint32_t Timeout);
-	HAL_SPI_TransmitReceive(&hspi2, &data, &data, length, 100);
-	HAL_GPIO_WritePin(GPIOB, TMC_CS_Pin, 1);
-}*/
-
-
-uint32_t TMC5160_SPIWrite(uint8_t Adress, uint32_t Value, int Action)
-{
-
-	  SPI2Rx = 0;
-	  HAL_GPIO_WritePin(GPIOB,TMC_CS_Pin,0); // set TMC CS low
-
-	  if (Action == 1) //Write
-	  {
-		SPI2TxData[0] = Adress + 0x80;
-	  }
-
-	  else //Read
-	  {
-		SPI2TxData[0] = Adress;
-	  }
-
-	  SPI2TxData[1] = Value >> 24;
-	  SPI2TxData[2] = Value >> 16;
-	  SPI2TxData[3] = Value >> 8;
-	  SPI2TxData[4] = Value;
-
-	  HAL_SPI_TransmitReceive(&hspi2, SPI2TxData, SPI2RxData, 0x05, 100);
-
-
-	  SPI2Rx += (SPI2RxData[1] << 24);
-	  SPI2Rx += (SPI2RxData[2] << 16);
-	  SPI2Rx += (SPI2RxData[3] << 8);
-	  SPI2Rx += (SPI2RxData[4] << 0);
-
-	  HAL_GPIO_WritePin(GPIOB,TMC_CS_Pin,1); // set TMC CS high
-
-	  return SPI2Rx;
-}
-
-
-uint16_t AMS5055_SPIWriteInt(uint16_t Adress, int Action)
-{
-	/* WRITE = 0
-	| 15 14 13 12 11 10 09 08 07 06 05 04 03 02 01  00 |
- 	| 0	|			 Data 14:1		   		      | PAR|
-
-
- 	(Data (14 bit) +  + parity)
-	| 15 14 13 12 11 10 09 08 07 06 05 04 03 02 01  00 |
- 	|		 		 Data 15:2		   		   |EF| PAR|
-
- 	EF-> 0 = no command frame error occurred, 1 = error occurred
- 	PAR -> Parity bit
-	*/
-
-	/* READ = 1
-	| 15 14 13 12 11 10 09 08 07 06 05 04 03 02 01  00 |
- 	| 1	|			 Data 14:1		   		      | PAR|
-
-
-
-	| 15 14 13 12 11 10 09 08 07 06 05 04 03 02 01  00 |
- 	|				 Data 15:2		   		   |DC| PAR|
-
- 	DC -> Don't care
- 	PAR -> Parity bit
-	*/
-
-	  SPI1Rx = 0;
-	  SPI1Tx = 0;
-	  SPI1Tx = (Adress << 1);
-
-	  if (Action == 1) //READ
-	  {
-		  SPI1Tx = SPI1Tx | 0x8000;
-	  }
-
-	  SPI1Tx = SPI1Tx | AMSParity(SPI1Tx);
-
-	  HAL_GPIO_WritePin(GPIOA,AMS_CS_Pin,0); // set TMC CS low
-
-	  SPI1TxData[0] = SPI1Tx >> 8;
-	  SPI1TxData[1] = SPI1Tx;
-
-	  HAL_SPI_TransmitReceive(&hspi1, SPI1TxData, SPI1RxData, 0x02, 100);
-
-	  HAL_GPIO_WritePin(GPIOA,AMS_CS_Pin,1); // set TMC CS high
-
-	  SPI1Rx += (SPI1RxData[0] << 8);
-	  SPI1Rx += (SPI1RxData[1] << 0);
-
-	  return SPI1Rx;
-}
-
-void AMS_Delay(uint32_t Delay)
-{
-	  uint32_t tickstart = HAL_GetTick();
-	  uint32_t wait = Delay;
-
-	  /* Add a freq to guarantee minimum wait */
-	  if (wait < HAL_MAX_DELAY)
-	  {
-	    wait += (uint32_t)(uwTickFreq);
-	  }
-
-	  while((HAL_GetTick() - tickstart) < wait)
-	  {
-		  AMS5055_SPIWriteInt(ANGULAR_DATA,1);
-		  HAL_Delay(10);
-		  x++;
-
-		  if (x == 1000)
-		  {
-			  x = 0;
-		  }
-	  }
-}
-
-
-void AMS5055_Basic_Init(void)
-{
-	Angles[Ax] = AMS5055_SPIWriteInt(ANGULAR_DATA,1); // Random
-	Ax++;
-	HAL_Delay(100);
-
-	Angles[Ax] = AMS5055_SPIWriteInt(NOP,1); // Random
-	Ax++;
-	HAL_Delay(100);
-
-	Angles[Ax] = AMS5055_SPIWriteInt(AGC,1); // Random
-	Ax++;
-	HAL_Delay(100);
-
-	Angles[Ax] = AMS5055_SPIWriteInt(SOFTWARE_RESET,1); // Random
-	Ax++;
-	HAL_Delay(100);
-
-	Angles[Ax] = AMS5055_SPIWriteInt(SOFTWARE_RESET_SPI,0); // Random
-	Ax++;
-	HAL_Delay(100);
-
-	Angles[Ax] = AMS5055_SPIWriteInt(ANGULAR_DATA,1); // Random
-	Ax++;
-	HAL_Delay(100);
-
-	Angles[Ax] = AMS5055_SPIWriteInt(NOP,1); // Random
-	Ax++;
-	HAL_Delay(100);
-
-	Angles[Ax] = AMS5055_SPIWriteInt(AGC,1); // Random
-	Ax++;
-	HAL_Delay(100);
-
-	Angles[Ax] = AMS5055_SPIWriteInt(ANGULAR_DATA,1); // Random
-	Ax++;
-	HAL_Delay(100);
-
-	Angles[Ax] = AMS5055_SPIWriteInt(ANGULAR_DATA,1); // Random
-	Ax++;
-	HAL_Delay(100);
-
-	Angles[Ax] = AMS5055_SPIWriteInt(ANGULAR_DATA,1); // Random
-	Ax++;
-	HAL_Delay(100);
-
-
-
-
-
-
-
-	/*
-	Angles[Ax] = AMS5055_SPIWriteInt(NOP,1); // Ang data
-	Ax++;
-	HAL_Delay(100);
-
-	Angles[Ax] = AMS5055_SPIWriteInt(NOP,1); // 0
-	Ax++;
-	HAL_Delay(100);
-	*/
-}
-
-uint8_t AMSParity(uint16_t value)
-{
-	uint8_t cnt = 0;
-	uint8_t i;
-
-	for (i = 0; i < 16; i++)
-	{
-		if (value & 0x1)
-		{
-			cnt++;
-		}
-
-		value >>= 1;
-	}
-	return cnt & 0x1;
-}
-
-
-uint16_t AMS5055_Get_Position(void)
-{
-	AMS5055_SPIWriteInt(NOP,1);
-	AMS5055_SPIWriteInt(ANGULAR_DATA,1);
-
-	while(AMS_Ready != 1) //wacht op INT
-	{
-
-	}
-
-	Angle = AMS5055_SPIWriteInt(NOP,1);
-
-
-	/*
-	 if (((Angle >> 1) & 0x1))
-	 {
-	 AMS5055_SPIWriteInt(CLEAR_ERROR_FLAG); //clear error flag
-	 }
-	 */
-
-	// set first 4 bits to 0
-
-
-
-	//Angle &= ~(1 << 12);
-	Angle &= ~(1 << 13);
-	Angle &= ~(1 << 14);
-	Angle &= ~(1 << 15);
-	Angle &= ~(1 << 16);
-
-	/*
-	Angle = ((Angle >> 2) & 0);
-	Angle = ((Angle >> 3) & 0);
-	Angle = ((Angle >> 4) & 0);
-	 */
-
-
-
-
-
-	//Angle = (Angle << 4) & 0x3fff;
-	//Angle = ((Angle * 360) / 4095);
-
-	Angles[Ax] = Angle;
-
-	if (Ax == 2000)
-	{
-		Ax = 0;
-	}
-
-	else
-	{
-		Ax++;
-		AMS_Ready = 0;
-	}
-
-
-
-	return Angles[Ax];
-}
-
-
 /* USER CODE END 4 */
 
 /**

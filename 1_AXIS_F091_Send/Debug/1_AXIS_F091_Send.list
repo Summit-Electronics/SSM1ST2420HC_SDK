@@ -27,23 +27,25 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   ALLOC
  11 .ARM.attributes 00000028  00000000  00000000  0002000c  2**0
                   CONTENTS, READONLY
- 12 .debug_info   00007f56  00000000  00000000  00020034  2**0
-                  CONTENTS, READONLY, DEBUGGING, OCTETS
- 13 .debug_abbrev 00001688  00000000  00000000  00027f8a  2**0
-                  CONTENTS, READONLY, DEBUGGING, OCTETS
- 14 .debug_aranges 000007b8  00000000  00000000  00029618  2**3
-                  CONTENTS, READONLY, DEBUGGING, OCTETS
- 15 .debug_ranges 00000700  00000000  00000000  00029dd0  2**3
-                  CONTENTS, READONLY, DEBUGGING, OCTETS
- 16 .debug_macro  0001924d  00000000  00000000  0002a4d0  2**0
-                  CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .debug_line   00008e4a  00000000  00000000  0004371d  2**0
-                  CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_str    0009f1c3  00000000  00000000  0004c567  2**0
-                  CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .comment      00000050  00000000  00000000  000eb72a  2**0
+ 12 .comment      00000043  00000000  00000000  00020034  2**0
                   CONTENTS, READONLY
- 20 .debug_frame  00001aac  00000000  00000000  000eb77c  2**2
+ 13 .debug_info   00007a2d  00000000  00000000  00020077  2**0
+                  CONTENTS, READONLY, DEBUGGING, OCTETS
+ 14 .debug_abbrev 00001721  00000000  00000000  00027aa4  2**0
+                  CONTENTS, READONLY, DEBUGGING, OCTETS
+ 15 .debug_aranges 000007b8  00000000  00000000  000291c8  2**3
+                  CONTENTS, READONLY, DEBUGGING, OCTETS
+ 16 .debug_rnglists 000005d7  00000000  00000000  00029980  2**0
+                  CONTENTS, READONLY, DEBUGGING, OCTETS
+ 17 .debug_macro  000014bc  00000000  00000000  00029f57  2**0
+                  CONTENTS, READONLY, DEBUGGING, OCTETS
+ 18 .debug_line   00009559  00000000  00000000  0002b413  2**0
+                  CONTENTS, READONLY, DEBUGGING, OCTETS
+ 19 .debug_str    0009f43e  00000000  00000000  0003496c  2**0
+                  CONTENTS, READONLY, DEBUGGING, OCTETS
+ 20 .debug_frame  00001aac  00000000  00000000  000d3dac  2**2
+                  CONTENTS, READONLY, DEBUGGING, OCTETS
+ 21 .debug_line_str 0000005c  00000000  00000000  000d5858  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -228,7 +230,7 @@ Disassembly of section .text:
  800021a:	46c0      	nop			; (mov r8, r8)
 
 0800021c <HAL_CAN_RxFifo0MsgPendingCallback>:
-uint32_t TxMailbox[3];		//CAN Mailbox
+
 
 
 /*  CAN RECEIVE INTERRUPT */
@@ -264,7 +266,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
  8000246:	46c0      	nop			; (mov r8, r8)
  8000248:	20000194 	.word	0x20000194
  800024c:	20000170 	.word	0x20000170
- 8000250:	2000019c 	.word	0x2000019c
+ 8000250:	200001a8 	.word	0x200001a8
 
 08000254 <main>:
 /**
@@ -419,8 +421,8 @@ int main(void)
  8000314:	20000068 	.word	0x20000068
  8000318:	20000158 	.word	0x20000158
  800031c:	2000018c 	.word	0x2000018c
- 8000320:	200001a0 	.word	0x200001a0
- 8000324:	2000019c 	.word	0x2000019c
+ 8000320:	2000019c 	.word	0x2000019c
+ 8000324:	200001a8 	.word	0x200001a8
 
 08000328 <SystemClock_Config>:
 /**
@@ -439,14 +441,14 @@ void SystemClock_Config(void)
  8000334:	2334      	movs	r3, #52	; 0x34
  8000336:	001a      	movs	r2, r3
  8000338:	2100      	movs	r1, #0
- 800033a:	f002 fcf7 	bl	8002d2c <memset>
+ 800033a:	f002 fcd3 	bl	8002ce4 <memset>
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
  800033e:	1d3b      	adds	r3, r7, #4
  8000340:	0018      	movs	r0, r3
  8000342:	2310      	movs	r3, #16
  8000344:	001a      	movs	r2, r3
  8000346:	2100      	movs	r1, #0
- 8000348:	f002 fcf0 	bl	8002d2c <memset>
+ 8000348:	f002 fccc 	bl	8002ce4 <memset>
 
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
@@ -545,7 +547,7 @@ static void MX_ADC_Init(void)
  80003be:	230c      	movs	r3, #12
  80003c0:	001a      	movs	r2, r3
  80003c2:	2100      	movs	r1, #0
- 80003c4:	f002 fcb2 	bl	8002d2c <memset>
+ 80003c4:	f002 fc8e 	bl	8002ce4 <memset>
 
   /* USER CODE END ADC_Init 1 */
 
@@ -1021,7 +1023,7 @@ static void MX_GPIO_Init(void)
  8000648:	2314      	movs	r3, #20
  800064a:	001a      	movs	r2, r3
  800064c:	2100      	movs	r1, #0
- 800064e:	f002 fb6d 	bl	8002d2c <memset>
+ 800064e:	f002 fb49 	bl	8002ce4 <memset>
 
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOA_CLK_ENABLE();
@@ -1270,7 +1272,7 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* hadc)
  80007a2:	2314      	movs	r3, #20
  80007a4:	001a      	movs	r2, r3
  80007a6:	2100      	movs	r1, #0
- 80007a8:	f002 fac0 	bl	8002d2c <memset>
+ 80007a8:	f002 fa9c 	bl	8002ce4 <memset>
   if(hadc->Instance==ADC1)
  80007ac:	687b      	ldr	r3, [r7, #4]
  80007ae:	681b      	ldr	r3, [r3, #0]
@@ -1367,7 +1369,7 @@ void HAL_CAN_MspInit(CAN_HandleTypeDef* hcan)
  800082e:	2314      	movs	r3, #20
  8000830:	001a      	movs	r2, r3
  8000832:	2100      	movs	r1, #0
- 8000834:	f002 fa7a 	bl	8002d2c <memset>
+ 8000834:	f002 fa56 	bl	8002ce4 <memset>
   if(hcan->Instance==CAN)
  8000838:	687b      	ldr	r3, [r7, #4]
  800083a:	681b      	ldr	r3, [r3, #0]
@@ -1484,7 +1486,7 @@ void HAL_SPI_MspInit(SPI_HandleTypeDef* hspi)
  80008da:	2314      	movs	r3, #20
  80008dc:	001a      	movs	r2, r3
  80008de:	2100      	movs	r1, #0
- 80008e0:	f002 fa24 	bl	8002d2c <memset>
+ 80008e0:	f002 fa00 	bl	8002ce4 <memset>
   if(hspi->Instance==SPI1)
  80008e4:	687b      	ldr	r3, [r7, #4]
  80008e6:	681b      	ldr	r3, [r3, #0]
@@ -1532,7 +1534,7 @@ void HAL_SPI_MspInit(SPI_HandleTypeDef* hspi)
     PA6     ------> SPI1_MISO
     PA7     ------> SPI1_MOSI
     */
-    GPIO_InitStruct.Pin = AMS_SS_Pin|AMS_SCK_Pin|AMS_MISO_Pin|AMS_MOSI_Pin;
+    GPIO_InitStruct.Pin = AMS_CS_Pin|AMS_SCK_Pin|AMS_MISO_Pin|AMS_MOSI_Pin;
  8000926:	0021      	movs	r1, r4
  8000928:	187b      	adds	r3, r7, r1
  800092a:	22f0      	movs	r2, #240	; 0xf0
@@ -1603,7 +1605,7 @@ void HAL_SPI_MspInit(SPI_HandleTypeDef* hspi)
  8000992:	4013      	ands	r3, r2
  8000994:	60fb      	str	r3, [r7, #12]
  8000996:	68fb      	ldr	r3, [r7, #12]
-    GPIO_InitStruct.Pin = TMC_CSN_Pin|TMC_SCK_Pin|TMC_MISO_Pin|TMC_MOSI_Pin;
+    GPIO_InitStruct.Pin = TMC_CS_Pin|TMC_SCK_Pin|TMC_MISO_Pin|TMC_MOSI_Pin;
  8000998:	211c      	movs	r1, #28
  800099a:	187b      	adds	r3, r7, r1
  800099c:	22f0      	movs	r2, #240	; 0xf0
@@ -1854,7 +1856,7 @@ LoopFillZerobss:
  8000a5e:	f7ff ffe3 	bl	8000a28 <SystemInit>
 /* Call static constructors */
   bl __libc_init_array
- 8000a62:	f002 f93f 	bl	8002ce4 <__libc_init_array>
+ 8000a62:	f002 f947 	bl	8002cf4 <__libc_init_array>
 /* Call the application's entry point.*/
   bl main
  8000a66:	f7ff fbf5 	bl	8000254 <main>
@@ -8557,48 +8559,48 @@ HAL_StatusTypeDef HAL_SPI_Init(SPI_HandleTypeDef *hspi)
  8002cde:	bd80      	pop	{r7, pc}
  8002ce0:	fffff7ff 	.word	0xfffff7ff
 
-08002ce4 <__libc_init_array>:
- 8002ce4:	b570      	push	{r4, r5, r6, lr}
- 8002ce6:	2600      	movs	r6, #0
- 8002ce8:	4d0c      	ldr	r5, [pc, #48]	; (8002d1c <__libc_init_array+0x38>)
- 8002cea:	4c0d      	ldr	r4, [pc, #52]	; (8002d20 <__libc_init_array+0x3c>)
- 8002cec:	1b64      	subs	r4, r4, r5
- 8002cee:	10a4      	asrs	r4, r4, #2
- 8002cf0:	42a6      	cmp	r6, r4
- 8002cf2:	d109      	bne.n	8002d08 <__libc_init_array+0x24>
- 8002cf4:	2600      	movs	r6, #0
- 8002cf6:	f000 f821 	bl	8002d3c <_init>
- 8002cfa:	4d0a      	ldr	r5, [pc, #40]	; (8002d24 <__libc_init_array+0x40>)
- 8002cfc:	4c0a      	ldr	r4, [pc, #40]	; (8002d28 <__libc_init_array+0x44>)
- 8002cfe:	1b64      	subs	r4, r4, r5
- 8002d00:	10a4      	asrs	r4, r4, #2
- 8002d02:	42a6      	cmp	r6, r4
- 8002d04:	d105      	bne.n	8002d12 <__libc_init_array+0x2e>
- 8002d06:	bd70      	pop	{r4, r5, r6, pc}
- 8002d08:	00b3      	lsls	r3, r6, #2
- 8002d0a:	58eb      	ldr	r3, [r5, r3]
- 8002d0c:	4798      	blx	r3
- 8002d0e:	3601      	adds	r6, #1
- 8002d10:	e7ee      	b.n	8002cf0 <__libc_init_array+0xc>
- 8002d12:	00b3      	lsls	r3, r6, #2
- 8002d14:	58eb      	ldr	r3, [r5, r3]
- 8002d16:	4798      	blx	r3
- 8002d18:	3601      	adds	r6, #1
- 8002d1a:	e7f2      	b.n	8002d02 <__libc_init_array+0x1e>
- 8002d1c:	08002d84 	.word	0x08002d84
- 8002d20:	08002d84 	.word	0x08002d84
- 8002d24:	08002d84 	.word	0x08002d84
- 8002d28:	08002d88 	.word	0x08002d88
+08002ce4 <memset>:
+ 8002ce4:	0003      	movs	r3, r0
+ 8002ce6:	1882      	adds	r2, r0, r2
+ 8002ce8:	4293      	cmp	r3, r2
+ 8002cea:	d100      	bne.n	8002cee <memset+0xa>
+ 8002cec:	4770      	bx	lr
+ 8002cee:	7019      	strb	r1, [r3, #0]
+ 8002cf0:	3301      	adds	r3, #1
+ 8002cf2:	e7f9      	b.n	8002ce8 <memset+0x4>
 
-08002d2c <memset>:
- 8002d2c:	0003      	movs	r3, r0
- 8002d2e:	1882      	adds	r2, r0, r2
- 8002d30:	4293      	cmp	r3, r2
- 8002d32:	d100      	bne.n	8002d36 <memset+0xa>
- 8002d34:	4770      	bx	lr
- 8002d36:	7019      	strb	r1, [r3, #0]
- 8002d38:	3301      	adds	r3, #1
- 8002d3a:	e7f9      	b.n	8002d30 <memset+0x4>
+08002cf4 <__libc_init_array>:
+ 8002cf4:	b570      	push	{r4, r5, r6, lr}
+ 8002cf6:	2600      	movs	r6, #0
+ 8002cf8:	4c0c      	ldr	r4, [pc, #48]	; (8002d2c <__libc_init_array+0x38>)
+ 8002cfa:	4d0d      	ldr	r5, [pc, #52]	; (8002d30 <__libc_init_array+0x3c>)
+ 8002cfc:	1b64      	subs	r4, r4, r5
+ 8002cfe:	10a4      	asrs	r4, r4, #2
+ 8002d00:	42a6      	cmp	r6, r4
+ 8002d02:	d109      	bne.n	8002d18 <__libc_init_array+0x24>
+ 8002d04:	2600      	movs	r6, #0
+ 8002d06:	f000 f819 	bl	8002d3c <_init>
+ 8002d0a:	4c0a      	ldr	r4, [pc, #40]	; (8002d34 <__libc_init_array+0x40>)
+ 8002d0c:	4d0a      	ldr	r5, [pc, #40]	; (8002d38 <__libc_init_array+0x44>)
+ 8002d0e:	1b64      	subs	r4, r4, r5
+ 8002d10:	10a4      	asrs	r4, r4, #2
+ 8002d12:	42a6      	cmp	r6, r4
+ 8002d14:	d105      	bne.n	8002d22 <__libc_init_array+0x2e>
+ 8002d16:	bd70      	pop	{r4, r5, r6, pc}
+ 8002d18:	00b3      	lsls	r3, r6, #2
+ 8002d1a:	58eb      	ldr	r3, [r5, r3]
+ 8002d1c:	4798      	blx	r3
+ 8002d1e:	3601      	adds	r6, #1
+ 8002d20:	e7ee      	b.n	8002d00 <__libc_init_array+0xc>
+ 8002d22:	00b3      	lsls	r3, r6, #2
+ 8002d24:	58eb      	ldr	r3, [r5, r3]
+ 8002d26:	4798      	blx	r3
+ 8002d28:	3601      	adds	r6, #1
+ 8002d2a:	e7f2      	b.n	8002d12 <__libc_init_array+0x1e>
+ 8002d2c:	08002d84 	.word	0x08002d84
+ 8002d30:	08002d84 	.word	0x08002d84
+ 8002d34:	08002d88 	.word	0x08002d88
+ 8002d38:	08002d84 	.word	0x08002d84
 
 08002d3c <_init>:
  8002d3c:	b5f8      	push	{r3, r4, r5, r6, r7, lr}

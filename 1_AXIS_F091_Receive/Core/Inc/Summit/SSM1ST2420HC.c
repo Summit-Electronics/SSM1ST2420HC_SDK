@@ -13,7 +13,7 @@ uint32_t SG_RESULTS[1000];
 uint32_t T_STEP[1000];
 int x = 0;
 
-/* AMS VARIABLES */ //TODO: wegwerken in SSM1ST24HC library
+/* AMS VARIABLES */
 //uint16_t Angles[4100];	//remove "//" for logging angle data
 int Ax = 0;				// counter for buffer
 uint8_t AMS_Ready;		//check for interrupt

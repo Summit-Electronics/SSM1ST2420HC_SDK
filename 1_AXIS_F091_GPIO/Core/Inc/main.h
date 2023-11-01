@@ -31,6 +31,7 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "SSM1ST2420HC.h"
 
 /* USER CODE END Includes */
 
@@ -53,7 +54,15 @@ extern "C" {
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
-
+extern SPI_HandleTypeDef hspi1;
+extern SPI_HandleTypeDef hspi2;
+extern ADC_HandleTypeDef hadc;
+extern CAN_HandleTypeDef hcan;
+extern int Ax;
+extern uint16_t Angles[4100];
+extern int AMS_ENB;
+extern int ENC_ENB;
+extern uint8_t AMS_Ready;
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/

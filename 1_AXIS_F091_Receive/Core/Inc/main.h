@@ -31,7 +31,7 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "SSM1ST2420HC.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -53,7 +53,15 @@ extern "C" {
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
-
+extern SPI_HandleTypeDef hspi1;
+extern SPI_HandleTypeDef hspi2;
+extern ADC_HandleTypeDef hadc;
+extern CAN_HandleTypeDef hcan;
+extern int Ax;
+extern uint16_t Angles[4100];
+extern int AMS_ENB;
+extern int ENC_ENB;
+extern uint8_t AMS_Ready;
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
@@ -61,16 +69,16 @@ void Error_Handler(void);
 #define AIN_MCU_GPIO_Port GPIOA
 #define CAN_STB_Pin GPIO_PIN_2
 #define CAN_STB_GPIO_Port GPIOA
-#define AMS_SS_Pin GPIO_PIN_4
-#define AMS_SS_GPIO_Port GPIOA
+#define AMS_CS_Pin GPIO_PIN_4
+#define AMS_CS_GPIO_Port GPIOA
 #define AMS_SCK_Pin GPIO_PIN_5
 #define AMS_SCK_GPIO_Port GPIOA
 #define AMS_MISO_Pin GPIO_PIN_6
 #define AMS_MISO_GPIO_Port GPIOA
 #define AMS_MOSI_Pin GPIO_PIN_7
 #define AMS_MOSI_GPIO_Port GPIOA
-#define TMC_CSN_Pin GPIO_PIN_12
-#define TMC_CSN_GPIO_Port GPIOB
+#define TMC_CS_Pin GPIO_PIN_12
+#define TMC_CS_GPIO_Port GPIOB
 #define TMC_SCK_Pin GPIO_PIN_13
 #define TMC_SCK_GPIO_Port GPIOB
 #define TMC_MISO_Pin GPIO_PIN_14

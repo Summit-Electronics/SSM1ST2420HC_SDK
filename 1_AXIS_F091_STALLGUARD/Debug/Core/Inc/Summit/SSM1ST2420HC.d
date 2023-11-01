@@ -31,16 +31,7 @@ Core/Inc/Summit/SSM1ST2420HC.o: ../Core/Inc/Summit/SSM1ST2420HC.c \
  ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_spi.h \
  ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_spi_ex.h \
  ../Core/Inc/main.h \
- C:/Github_Local/SSM1ST2420HC/1_AXIS_F091_STALLGUARD/Core/Inc/Summit/SSM1ST2420HC.h \
- ../Core/Inc/tmc/ic/TMC5160/TMC5160.h \
- ../Core/Inc/tmc/helpers/API_Header.h ../Core/Inc/tmc/helpers/Config.h \
- ../Core/Inc/tmc/helpers/Constants.h ../Core/Inc/tmc/helpers/Types.h \
- ../Core/Inc/tmc/helpers/Macros.h ../Core/Inc/tmc/helpers/Bits.h \
- ../Core/Inc/tmc/helpers/CRC.h ../Core/Inc/tmc/helpers/RegisterAccess.h \
- ../Core/Inc/tmc/ic/TMC5160/TMC5160_Register.h \
- ../Core/Inc/tmc/ic/TMC5160/TMC5160_Constants.h \
- ../Core/Inc/tmc/helpers/Constants.h \
- ../Core/Inc/tmc/ic/TMC5160/TMC5160_Fields.h
+ C:/Github_Local/SSM1ST2420HC/1_AXIS_F091_STALLGUARD/Core/Inc/Summit/SSM1ST2420HC.h
 ../Core/Inc/Summit/SSM1ST2420HC.h:
 ../Core/Inc/Summit/AS5055A_Registers.h:
 ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal.h:
@@ -75,16 +66,3 @@ Core/Inc/Summit/SSM1ST2420HC.o: ../Core/Inc/Summit/SSM1ST2420HC.c \
 ../Drivers/STM32F0xx_HAL_Driver/Inc/stm32f0xx_hal_spi_ex.h:
 ../Core/Inc/main.h:
 C:/Github_Local/SSM1ST2420HC/1_AXIS_F091_STALLGUARD/Core/Inc/Summit/SSM1ST2420HC.h:
-../Core/Inc/tmc/ic/TMC5160/TMC5160.h:
-../Core/Inc/tmc/helpers/API_Header.h:
-../Core/Inc/tmc/helpers/Config.h:
-../Core/Inc/tmc/helpers/Constants.h:
-../Core/Inc/tmc/helpers/Types.h:
-../Core/Inc/tmc/helpers/Macros.h:
-../Core/Inc/tmc/helpers/Bits.h:
-../Core/Inc/tmc/helpers/CRC.h:
-../Core/Inc/tmc/helpers/RegisterAccess.h:
-../Core/Inc/tmc/ic/TMC5160/TMC5160_Register.h:
-../Core/Inc/tmc/ic/TMC5160/TMC5160_Constants.h:
-../Core/Inc/tmc/helpers/Constants.h:
-../Core/Inc/tmc/ic/TMC5160/TMC5160_Fields.h:

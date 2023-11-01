@@ -65,7 +65,8 @@ static void MX_SPI2_Init(void);
 /* CAN VARIABLES */
 CAN_TxHeaderTypeDef CANTxHeader;
 CAN_RxHeaderTypeDef CANRxHeader;
-ConfigurationTypeDef configHeader;
+
+/* RAMP config */
 RampConfig Ramp1;
 RampConfig StallSettings1;
 RampConfig StealthSettings1;
@@ -74,24 +75,22 @@ RampConfig StopRamp1;
 /* Current config */
 CurrentConfig CurrentSetting1;
 
-uint8_t CANTxData[8];	//CANTX data array
-uint8_t CANRxData[8];	//CANRX data array
-uint32_t TxMailbox[3];	//CAN Mailbox
-int Datacheck;			//CAN Datacheck
-
-/* AMS VARIABLES */
-uint16_t Angles[4100];	//buffer for logging
-int Ax = 0;				// counter for buffer
-uint8_t AMS_Ready;		//check for interrupt
-
 /* Settings */
 int AMS_ENB = 0; // 0 = disable Hall sensor , 1 = enable Hall sensor
 int ENC_ENB = 0; // 0 = disable Encoder , 1 = enable Encoder
 int STG_ENB = 0; // 0 = disable Stallguard, 1 = enable Stallguard
 
+/* CAN VARIABLES */  //
+CAN_TxHeaderTypeDef CANTxHeader;
+CAN_RxHeaderTypeDef CANRxHeader;
+
+uint8_t CANTxData[8];	//CANTX data array
+uint8_t CANRxData[8];	//CANRX data array
+uint32_t TxMailbox[3];	//CAN Mailbox
+int Datacheck;			//temp value for checking incomming CAN Data
+
 uint32_t currentposition = 0;
 uint32_t Home = 0;
-/* test 10-5-23 */
 
 /*  CAN RECEIVE INTERRUPT */
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
@@ -166,7 +165,7 @@ int main(void)
   Ramp1.D1 		= 1400; 	//Motor Decelaration speed from V1 to VStop
   Ramp1.VSTOP 	= 10;		//Motor Stop speed
 
-  CurrentSetting1.IHOLD = 3;//3
+  CurrentSetting1.IHOLD = 3;
   CurrentSetting1.IRUN 	= 1;
 
   TMC5160_Basic_Init(&CurrentSetting1);
