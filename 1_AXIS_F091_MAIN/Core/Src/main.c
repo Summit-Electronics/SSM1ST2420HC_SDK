@@ -92,7 +92,6 @@ int STG_ENB = 0; // 0 = disable Stallguard, 1 = enable Stallguard
 // temp val for GPIO test
 int Readin2 = 0;
 
-//test 19-6-23 date latest edit
 
 /*  CAN RECEIVE INTERRUPT */
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
