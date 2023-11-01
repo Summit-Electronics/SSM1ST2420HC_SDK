@@ -71,27 +71,19 @@ RampConfig StopRamp1;
 /* Current config */
 CurrentConfig CurrentSetting1;
 
-/* CAN VARIABLES */  //TODO: wegwerken in SSM1ST24HC library
-CAN_TxHeaderTypeDef CANTxHeader;
-CAN_RxHeaderTypeDef CANRxHeader;
-uint8_t CANTxData[8];	//CANTX data array
-uint8_t CANRxData[8];	//CANRX data array
-uint32_t TxMailbox[3];	//CAN Mailbox
-int Datacheck;			//CAN Datacheck
-
-/* AMS VARIABLES */ //TODO: wegwerken in SSM1ST24HC library
-uint16_t Angles[4100];	//buffer for logging
-int Ax = 0;				// counter for buffer
-uint8_t AMS_Ready;		//check for interrupt
-
 /* Settings */
 int AMS_ENB = 0; // 0 = disable Hall sensor , 1 = enable Hall sensor
 int ENC_ENB = 0; // 0 = disable Encoder , 1 = enable Encoder
 int STG_ENB = 0; // 0 = disable Stallguard, 1 = enable Stallguard
 
-// temp val for GPIO test
-int Readin2 = 0;
+/* CAN VARIABLES */  //
+CAN_TxHeaderTypeDef CANTxHeader;
+CAN_RxHeaderTypeDef CANRxHeader;
 
+uint8_t CANTxData[8];	//CANTX data array
+uint8_t CANRxData[8];	//CANRX data array
+uint32_t TxMailbox[3];	//CAN Mailbox
+int Datacheck;			//temp value for checking incomming CAN Data
 
 /*  CAN RECEIVE INTERRUPT */
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
@@ -186,13 +178,6 @@ int main(void)
 
   Drive_Enable(1); // enable driver
 
-  Readin2 = Read_IN(2);
-  HAL_GPIO_WritePin(GPIOB,EXT_OUT_2_Pin,1);
-  Readin2 = Read_IN(2);
-  HAL_Delay(1000);
-  HAL_GPIO_WritePin(GPIOB,EXT_OUT_2_Pin,0);
-  Readin2 = Read_IN(2);
-
 	if (STG_ENB == 1) {
 		TMC5160_Basic_Rotate(1, &StallSettings1); //Stallguard example basic movement started
 		//if motor does not spin, Stallguard is triggered, adding a delay before init will fix it.
@@ -206,12 +191,6 @@ int main(void)
 
 
 
-    TMC5160_Rotate_To(12800, &Ramp1); // move to Position X
-    TMC5160_Rotate_To(0, &Ramp1); // move to Position X
-    TMC5160_Rotate_To(25600, &Ramp1); // move to Position X
-    TMC5160_Rotate_To(0, &Ramp1); // move to Position X
-    TMC5160_Rotate_To(38400, &Ramp1); // move to Position X
-    TMC5160_Rotate_To(0, &Ramp1); // move to Position X
     TMC5160_Rotate_To(51200, &Ramp1); // move to Position X
     TMC5160_Rotate_To(0, &Ramp1); // move to Position X
 
