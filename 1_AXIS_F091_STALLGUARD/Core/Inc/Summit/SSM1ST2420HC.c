@@ -13,11 +13,10 @@ uint32_t SG_RESULTS[1000];
 uint32_t T_STEP[1000];
 int x = 0;
 
-int Standstill = 0;
-int SG2_trigger = 0;
-int Driver_error = 0;
-int Reset_error = 0;
-
+/* AMS VARIABLES */ //TODO: wegwerken in SSM1ST24HC library
+//uint16_t Angles[4100];	//remove "//" for logging angle data
+int Ax = 0;				// counter for buffer
+uint8_t AMS_Ready;		//check for interrupt
 
 
 void TMC5160_Basic_Init(CurrentConfig *Current)
@@ -26,7 +25,6 @@ void TMC5160_Basic_Init(CurrentConfig *Current)
 	 I_RUN, Max run current = 20 = ~2.0A
 	 I_HOLD, Max Hold current = 20 = ~2.0A
 	*/
-
 
 	uint32_t IHOLD_IRUN = 0x00070000; // standard IHOLD DELAY value
 	//uint32_t GSTAT_VALUE = 0x00000000; //default value for GSTAT
@@ -44,10 +42,7 @@ void TMC5160_Basic_Init(CurrentConfig *Current)
 	IHOLD_IRUN += Current->IHOLD + (Current->IRUN <<8);
 
 	TMC5160_SPIWrite(0x00, 0x00000008, 1); // writing value 0x00000008 = 8 = 0.0 to address 0 = 0x00(GCONF)
-	TMC5160_SPIWrite(0x00, 0x00000000, 0); // writing value 0x00000008 = 8 = 0.0 to address 0 = 0x00(GCONF)
-	TMC5160_SPIWrite(0x01, 0x00000006, 1); // write 1 to clear GSTAT (clear GSTAT register)
-	TMC5160_SPIWrite(0x01, 0x00000000, 0); // read GSTAT (should be all 0)
-	TMC5160_SPIWrite(0x35, 0x00000040, 1); //0x35(RAMP_STAT)
+	TMC5160_SPIWrite(0x00, 0x00000008, 0); // writing value 0x00000008 = 8 = 0.0 to address 0 = 0x00(GCONF)
 
 	/*
 	GSTAT_VALUE = TMC5160_SPIWrite(0x01, 0x00000000, 0); // read GSTAT (should be all 0)
@@ -146,7 +141,6 @@ int TMC5160_Monitor_Stallguard(void)
 	uint32_t DRV_STATUS;
 	int Stall_Flag = 0;
 
-	TMC5160_SPIWrite(0x6F, 0x00000000, 0);
 	DRV_STATUS = TMC5160_SPIWrite(0x6F, 0x00000000, 0); //Read (DRV_STATUS)
 	//T_STEP[x] = TMC5160_SPIWrite(0x12, 0x00000000, 0); // 0x12(TSTEP)
 
@@ -297,7 +291,7 @@ void Drive_Enable(int state)
 }
 
 
-uint32_t TMC5160_SPIWrite(uint8_t Address, uint32_t Value, int Action)  // 1 = write 0 = read
+uint32_t TMC5160_SPIWrite(uint8_t Address, uint32_t Value, int Action)
 {
 
 	uint8_t SPI2TxData[5];  //TX data array SPI2
@@ -323,6 +317,7 @@ uint32_t TMC5160_SPIWrite(uint8_t Address, uint32_t Value, int Action)  // 1 = w
 
 	  HAL_SPI_TransmitReceive(&hspi2, SPI2TxData, SPI2RxData, 0x05, 100);
 
+
 	  SPI2Rx += (SPI2RxData[1] << 24);
 	  SPI2Rx += (SPI2RxData[2] << 16);
 	  SPI2Rx += (SPI2RxData[3] << 8);
@@ -330,45 +325,7 @@ uint32_t TMC5160_SPIWrite(uint8_t Address, uint32_t Value, int Action)  // 1 = w
 
 	  HAL_GPIO_WritePin(GPIOB,TMC_CS_Pin,1); // set TMC CS high
 
-	  if(Driver_error == 0)
-	  {
-		// check SPI error frame for issues:
-		if (SPI2RxData[0] & (1 << 3)) // standstill
-		{
-			Standstill = 1; // no action needed
-		}
-
-		if (SPI2RxData[0] & (1 << 2)) // SG2 trigger
-		{
-			SG2_trigger = 1; // no action needed
-		}
-
-		if (SPI2RxData[0] & (1 << 1)) //Driver error
-		{
-			Driver_error = 1; // possible action needed
-			TMC5160_Fault_monitor(); //check the critical error
-		}
-
-		if (SPI2RxData[0] & (1 << 0)) //Reset Flag
-		{
-			Reset_error = 1; // no action needed
-		}
-	  }
-
 	  return SPI2Rx;
-}
-
-void TMC5160_Fault_monitor(void)
-{
-	uint32_t DRV_STATUS;
-
-	TMC5160_SPIWrite(0x6F, 0x00000000, 0);
-	DRV_STATUS = TMC5160_SPIWrite(0x6F, 0x00000000, 0); //Read (DRV_STATUS)
-
-	while(1) //get stuck to check error with debugger
-	{
-
-	}
 }
 
 void AMS5055_Basic_Init(void)
@@ -423,12 +380,12 @@ uint16_t AMS5055_Get_Position(void)
 		Angle = Angle + 360;
 	}
 
-	Angles[Ax] = Angle;
+	/*Angles[Ax] = Angle;  //uncomment to enable logging of Angle position
 
-	if (Ax >= 4100)
+	if (Ax >= 4100) // to prevent overflow
 	{
 		Ax = 0;
-	}
+	}*/
 
 	else
 	{
@@ -436,7 +393,6 @@ uint16_t AMS5055_Get_Position(void)
 		AMS_Ready = 0;
 	}
 
-	//return Angles[Ax-1];
 	return Angle;
 }
 
