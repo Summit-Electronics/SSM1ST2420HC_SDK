@@ -13,6 +13,12 @@ uint32_t SG_RESULTS[1000];
 uint32_t T_STEP[1000];
 int x = 0;
 
+/* AMS VARIABLES */ //TODO: wegwerken in SSM1ST24HC library
+//uint16_t Angles[4100];	//remove "//" for logging angle data
+int Ax = 0;				// counter for buffer
+uint8_t AMS_Ready;		//check for interrupt
+
+
 void TMC5160_Basic_Init(CurrentConfig *Current)
 {
 	/* CURRENT SETTINGS
@@ -374,12 +380,12 @@ uint16_t AMS5055_Get_Position(void)
 		Angle = Angle + 360;
 	}
 
-	Angles[Ax] = Angle;
+	/*Angles[Ax] = Angle;  //uncomment to enable logging of Angle position
 
-	if (Ax >= 4100)
+	if (Ax >= 4100) // to prevent overflow
 	{
 		Ax = 0;
-	}
+	}*/
 
 	else
 	{
@@ -387,7 +393,6 @@ uint16_t AMS5055_Get_Position(void)
 		AMS_Ready = 0;
 	}
 
-	//return Angles[Ax-1];
 	return Angle;
 }
 
