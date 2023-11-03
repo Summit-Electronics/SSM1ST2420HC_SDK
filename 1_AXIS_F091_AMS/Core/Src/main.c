@@ -234,7 +234,8 @@ int main(void)
   Drive_Enable(1); // enable driver
 
   TMC5160_Rotate_To(51200, &Ramp1); // move to Position X
-  //TMC5160_Rotate_To(0, &Ramp1); // move to Position X
+  HAL_Delay(100);
+  TMC5160_Rotate_To(0, &Ramp1); // move to Position X
 
   TMC5160_Stop();
   Drive_Enable(0);

@@ -14,7 +14,7 @@ uint32_t T_STEP[1000];
 int x = 0;
 
 /* AMS VARIABLES */ //TODO: wegwerken in SSM1ST24HC library
-uint16_t Angles[4100];	//remove "//" for logging angle data
+uint16_t Angles[1000];	//remove "//" for logging angle data
 int Ax = 0;				// counter for buffer
 uint8_t AMS_Ready;		//check for interrupt
 uint16_t pAngle[100];
@@ -243,6 +243,7 @@ void TMC5160_Rotate_To(uint32_t Position, RampConfig *Ramp)
 
 		if(AMS_ENB == 1)// Hall sensor is enabled
 		{
+			HAL_Delay(5);
 			AMS_Angle = AMS5055_Get_Position();
 		}
 
@@ -368,7 +369,7 @@ uint16_t AMS5055_Get_Position(void)
 		//magnetic field too strong , lower AGC ?
 	}
 
-	/*
+
 	if(Angle > 32768)
 	{
 		Angle = Angle - 32768;
@@ -384,16 +385,17 @@ uint16_t AMS5055_Get_Position(void)
 		Angle = Angle - 8192;
 	}
 
+	/*
 	if(Angle > 4096)
 	{
 		Angle = Angle - 4096;
 	}*/
 
-	Angle &= 0x0FFF;
+	//Angle &= 0x0FFF;
 
 
 
-	//Angle >>= 2;
+	Angle >>= 1;
 
 	// remove first 2 and last 2 bits
 	//Angle &= ~(1 << 14);
@@ -412,7 +414,7 @@ uint16_t AMS5055_Get_Position(void)
 
 	Angles[Ax] = Angle;  //uncomment to enable logging of Angle position
 
-	if (Ax >= 4100) // to prevent overflow
+	if (Ax >= 1000) // to prevent overflow
 	{
 		Ax = 0;
 	}

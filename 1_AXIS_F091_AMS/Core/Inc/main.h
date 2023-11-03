@@ -58,7 +58,7 @@ extern SPI_HandleTypeDef hspi2;
 extern ADC_HandleTypeDef hadc;
 extern CAN_HandleTypeDef hcan;
 extern int Ax;
-extern uint16_t Angles[4100];
+extern uint16_t Angles[1000];
 extern int AMS_ENB;
 extern int ENC_ENB;
 extern uint8_t AMS_Ready;
