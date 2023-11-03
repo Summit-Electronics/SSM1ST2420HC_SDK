@@ -14,10 +14,10 @@ uint32_t T_STEP[1000];
 int x = 0;
 
 /* AMS VARIABLES */ //TODO: wegwerken in SSM1ST24HC library
-//uint16_t Angles[4100];	//remove "//" for logging angle data
+uint16_t Angles[4100];	//remove "//" for logging angle data
 int Ax = 0;				// counter for buffer
 uint8_t AMS_Ready;		//check for interrupt
-
+uint16_t pAngle[100];
 
 void TMC5160_Basic_Init(CurrentConfig *Current)
 {
@@ -330,7 +330,9 @@ uint32_t TMC5160_SPIWrite(uint8_t Address, uint32_t Value, int Action)
 
 void AMS5055_Basic_Init(void)
 {
+	//start new angle measuremnt
 	AMSoffset = AMS5055_Get_Position();  // Angle read when standstill is offset
+
 }
 
 uint16_t AMS5055_Get_Position(void)
@@ -366,26 +368,54 @@ uint16_t AMS5055_Get_Position(void)
 		//magnetic field too strong , lower AGC ?
 	}
 
+	/*
+	if(Angle > 32768)
+	{
+		Angle = Angle - 32768;
+	}
+
+	if(Angle > 16384)
+	{
+		Angle = Angle - 16384;
+	}
+
+	if(Angle > 8192)
+	{
+		Angle = Angle - 8192;
+	}
+
+	if(Angle > 4096)
+	{
+		Angle = Angle - 4096;
+	}*/
+
+	Angle &= 0x0FFF;
+
+
+
+	//Angle >>= 2;
+
 	// remove first 2 and last 2 bits
+	//Angle &= ~(1 << 14);
+	//Angle &= ~(1 << 15);
+	//Angle = (Angle >> 2);
 
-	Angle &= ~(1 << 14);
-	Angle &= ~(1 << 15);
-	Angle = (Angle >> 2);
+	//Angle = ((Angle * 360) / 4095); //12 bit resolution
+	//Angle = Angle - AMSoffset;  // AMS is not calibrated, so angle needs to be fixed
 
-	Angle = ((Angle * 360) / 4095); //12 bit resolution
-
-	Angle = Angle - AMSoffset;  // AMS is not calibrated, so angle needs to be fixed
+	/*
 	if((int)Angle <= 0)
 	{
 		Angle = Angle + 360;
-	}
+	}*/
 
-	/*Angles[Ax] = Angle;  //uncomment to enable logging of Angle position
+
+	Angles[Ax] = Angle;  //uncomment to enable logging of Angle position
 
 	if (Ax >= 4100) // to prevent overflow
 	{
 		Ax = 0;
-	}*/
+	}
 
 	else
 	{

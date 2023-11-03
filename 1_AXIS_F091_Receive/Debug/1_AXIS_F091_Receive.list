@@ -680,9 +680,9 @@ static void MX_CAN_Init(void)
  8000470:	4b2e      	ldr	r3, [pc, #184]	; (800052c <MX_CAN_Init+0xd0>)
  8000472:	4a2f      	ldr	r2, [pc, #188]	; (8000530 <MX_CAN_Init+0xd4>)
  8000474:	601a      	str	r2, [r3, #0]
-  hcan.Init.Prescaler = 16;
+  hcan.Init.Prescaler = 2;
  8000476:	4b2d      	ldr	r3, [pc, #180]	; (800052c <MX_CAN_Init+0xd0>)
- 8000478:	2210      	movs	r2, #16
+ 8000478:	2202      	movs	r2, #2
  800047a:	605a      	str	r2, [r3, #4]
   hcan.Init.Mode = CAN_MODE_NORMAL;
  800047c:	4b2b      	ldr	r3, [pc, #172]	; (800052c <MX_CAN_Init+0xd0>)

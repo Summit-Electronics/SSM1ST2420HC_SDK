@@ -130,7 +130,7 @@ int count = 0;
 
 
 /* Settings */
-int AMS_ENB = 0; // 0 = disable Hall sensor , 1 = enable Hall sensor
+int AMS_ENB = 1; // 0 = disable Hall sensor , 1 = enable Hall sensor
 int ENC_ENB = 0; // 0 = disable Encoder , 1 = enable Encoder
 int STG_ENB = 0; // 0 = disable Stallguard, 1 = enable Stallguard
 
@@ -217,9 +217,15 @@ int main(void)
 
   int h = 0;
   uint32_t Enc_Position[500];
+  HAL_GPIO_WritePin(GPIOA,AMS_CS_Pin,1); // set AM CS low
 
-  HAL_GPIO_WritePin(GPIOB,TMC_CS_Pin,1); // set TMC CS high
-  HAL_GPIO_WritePin(GPIOA,AMS_CS_Pin,1); // set TMC CS low
+  Drive_Enable(0); // enable driver
+  TMC5160_Stop();
+
+  TMC5160_SPIWrite(0x21, 0x00000000, 1);// writing value to address 24 = 0x2D(XTARGET)  1 lap
+  TMC5160_Rotate_To(0, &Ramp1);
+  HAL_Delay(1500);
+
 
   /* Perform Basic Init of TMC5160 and AMS5055 */
   TMC5160_Basic_Init(&CurrentSetting1);
@@ -228,7 +234,7 @@ int main(void)
   Drive_Enable(1); // enable driver
 
   TMC5160_Rotate_To(51200, &Ramp1); // move to Position X
-  TMC5160_Rotate_To(0, &Ramp1); // move to Position X
+  //TMC5160_Rotate_To(0, &Ramp1); // move to Position X
 
   TMC5160_Stop();
   Drive_Enable(0);
