@@ -243,7 +243,7 @@ void TMC5160_Rotate_To(uint32_t Position, RampConfig *Ramp)
 
 		if(AMS_ENB == 1)// Hall sensor is enabled
 		{
-			HAL_Delay(5);
+			HAL_Delay(5);//to reduce sensor readout freq
 			AMS_Angle = AMS5055_Get_Position();
 		}
 
@@ -333,14 +333,11 @@ void AMS5055_Basic_Init(void)
 {
 	//start new angle measuremnt
 	AMSoffset = AMS5055_Get_Position();  // Angle read when standstill is offset
-
 }
 
 uint16_t AMS5055_Get_Position(void)
 {
 	uint16_t Angle = 0;
-	int AlarmLo = 0;
-	int AlarmHi = 0;
 
 	AMS5055_SPIWriteInt(ANGULAR_DATA,1);
 
@@ -349,26 +346,6 @@ uint16_t AMS5055_Get_Position(void)
 	}
 
 	Angle = AMS5055_SPIWriteInt(NOP,1);
-
-	AlarmHi = (Angle >> 12) & 0x01; // AlamHi = b14
-	AlarmLo = (Angle >> 13) & 0x01; // AlarmLo = b15
-
-
-	if(AlarmLo == 1 && AlarmHi == 1)
-	{
-		//do X
-	}
-
-	if(AlarmLo == 1 && AlarmHi == 0)
-	{
-		//Magnetic field too weak, increase AGC ?
-	}
-
-	if(AlarmLo == 0 && AlarmHi == 1)
-	{
-		//magnetic field too strong , lower AGC ?
-	}
-
 
 	if(Angle > 32768)
 	{
@@ -385,35 +362,12 @@ uint16_t AMS5055_Get_Position(void)
 		Angle = Angle - 8192;
 	}
 
-	/*
-	if(Angle > 4096)
-	{
-		Angle = Angle - 4096;
-	}*/
-
-	//Angle &= 0x0FFF;
-
-
-
 	Angle >>= 1;
 
-	// remove first 2 and last 2 bits
-	//Angle &= ~(1 << 14);
-	//Angle &= ~(1 << 15);
-	//Angle = (Angle >> 2);
-
-	//Angle = ((Angle * 360) / 4095); //12 bit resolution
-	//Angle = Angle - AMSoffset;  // AMS is not calibrated, so angle needs to be fixed
-
-	/*
-	if((int)Angle <= 0)
-	{
-		Angle = Angle + 360;
-	}*/
-
+	Angle = Angle - AMSoffset;  // AMS is not calibrated, so angle needs to be fixed
+	Angle = ((float)Angle / 4095.0) * 360.0; //12 bit resolution
 
 	Angles[Ax] = Angle;  //uncomment to enable logging of Angle position
-
 	if (Ax >= 1000) // to prevent overflow
 	{
 		Ax = 0;

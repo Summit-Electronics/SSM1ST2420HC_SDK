@@ -222,6 +222,8 @@ int main(void)
   Drive_Enable(0); // enable driver
   TMC5160_Stop();
 
+  AMS5055_Basic_Init();
+
   TMC5160_SPIWrite(0x21, 0x00000000, 1);// writing value to address 24 = 0x2D(XTARGET)  1 lap
   TMC5160_Rotate_To(0, &Ramp1);
   HAL_Delay(1500);
@@ -229,7 +231,7 @@ int main(void)
 
   /* Perform Basic Init of TMC5160 and AMS5055 */
   TMC5160_Basic_Init(&CurrentSetting1);
-  AMS5055_Basic_Init();
+
 
   Drive_Enable(1); // enable driver
 
