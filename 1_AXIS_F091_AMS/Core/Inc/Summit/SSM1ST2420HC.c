@@ -366,8 +366,8 @@ uint16_t AMS5055_Get_Position(void)
 
 	Angle = Angle - AMSoffset;  // AMS is not calibrated, so angle needs to be fixed
 	Angle = ((float)Angle / 4095.0) * 360.0; //12 bit resolution
-
 	Angles[Ax] = Angle;  //uncomment to enable logging of Angle position
+
 	if (Ax >= 1000) // to prevent overflow
 	{
 		Ax = 0;
