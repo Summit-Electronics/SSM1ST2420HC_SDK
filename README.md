@@ -1,2 +1,3 @@
 # SSM1ST2420HC_SDK_V1.0
- SDK release 
+ SDK release V1.0
+ 
