@@ -17,7 +17,7 @@ int x = 0;
 uint16_t Angles[1000];	//remove "//" for logging angle data
 int Ax = 0;				// counter for buffer
 uint8_t AMS_Ready;		//check for interrupt
-uint16_t pAngle[100];
+uint16_t AngleP[1000];
 
 void TMC5160_Basic_Init(CurrentConfig *Current)
 {
@@ -333,11 +333,14 @@ void AMS5055_Basic_Init(void)
 {
 	//start new angle measuremnt
 	AMSoffset = AMS5055_Get_Position();  // Angle read when standstill is offset
+
+	//TODO berekening loopt niet goed van pos naar angle
 }
 
 uint16_t AMS5055_Get_Position(void)
 {
 	uint16_t Angle = 0;
+	float Calc_angle = 0;
 
 	AMS5055_SPIWriteInt(ANGULAR_DATA,1);
 
@@ -364,9 +367,12 @@ uint16_t AMS5055_Get_Position(void)
 
 	Angle >>= 1;
 
-	Angle = Angle - AMSoffset;  // AMS is not calibrated, so angle needs to be fixed
-	Angle = ((float)Angle / 4095.0) * 360.0; //12 bit resolution
 	Angles[Ax] = Angle;  //uncomment to enable logging of Angle position
+
+
+	Calc_angle = (Angle / 4095.0) * 360.0; //12 bit resolution
+	Calc_angle = Calc_angle - AMSoffset;  // AMS is not calibrated, so angle needs to be fixed
+	AngleP[Ax] = (int)Calc_angle;  //uncomment to enable logging of Angle position
 
 	if (Ax >= 1000) // to prevent overflow
 	{
