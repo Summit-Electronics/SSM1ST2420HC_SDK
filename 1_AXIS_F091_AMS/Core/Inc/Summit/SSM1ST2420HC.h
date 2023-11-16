@@ -87,7 +87,7 @@ void AMS5055_Basic_Init(void);
 /* Wake up the AMS5055 and perform basic initialize, also performs a read angle to calibrate the output of AMS5055_get_Position().
  * only perform this function once
  */
-uint16_t AMS5055_Get_Position(void);
+uint16_t AMS5055_Get_Position();
 /* Start a READ_ANGLE event and convert the result (12 bit) to an angle (Degrees).
  * TODO: check reliability
  */
