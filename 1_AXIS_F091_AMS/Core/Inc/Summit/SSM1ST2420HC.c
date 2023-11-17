@@ -244,7 +244,7 @@ void TMC5160_Rotate_To(uint32_t Position, RampConfig *Ramp)
 
 		if(AMS_ENB == 1)// Hall sensor is enabled
 		{
-			HAL_Delay(1);//to reduce sensor readout freq
+			HAL_Delay(2);//to reduce sensor readout freq
 			AMS_Angle = AMS5055_Get_Position();
 		}
 
@@ -332,11 +332,19 @@ uint32_t TMC5160_SPIWrite(uint8_t Address, uint32_t Value, int Action)
 
 void AMS5055_Basic_Init(void)
 {
-	//start new angle measuremnt
-	//AMS5055_Get_Position();  // Angle read when standstill is offset
-	AMSoffset = AMS5055_Get_Position();  // Angle read when standstill is offset
+	uint16_t Offsets[3];
 
-	//TODO berekening loopt niet goed van pos naar angle
+	//start new angle measuremnt
+
+	for(int y = 0; y < 3; y++)
+	{
+		Offsets[y] = AMS5055_Get_Position();  // Angle read when standstill is offset
+		HAL_Delay(5);
+	}
+
+	AMSoffset = (Offsets[1] + Offsets[2]) / 2;
+
+	//TODO: improve calibration value (to help close gap between AMS and TMC angle) usually 1 or 2 off
 }
 
 uint16_t AMS5055_Get_Position()
@@ -370,9 +378,14 @@ uint16_t AMS5055_Get_Position()
 
 	Angle >>= 1;
 
-	if(Ax == 0 && setOffset == 0) // first reading and no offset
+	if(Ax < 3 && setOffset == 0) // first reading and no offset
 	{
-		setOffset = 1;
+		if(Ax == 2)
+		{
+			setOffset = 1;
+		}
+
+		Ax++;
 		return Angle;   // return unprocessed offset value
 	}
 
@@ -387,8 +400,8 @@ uint16_t AMS5055_Get_Position()
 
 		Angle = Angle - AMSoffset;  // AMS is not calibrated, so angle needs to be fixed
 
-
 		Calc_angle = (Angle / 4095.0) * 360.0; //12 bit resolution
+		Calc_angle = 360 - Calc_angle; //invert data to match TMCAngle
 
 		AngleP[Ax] = (int)Calc_angle;  //uncomment to enable logging of Angle position
 
