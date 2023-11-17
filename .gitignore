@@ -66,3 +66,11 @@ release
 *.mk
 *.mk
 *.o
+1_AXIS_F091_Turntable_Demo/.settings/language.settings.xml
+1_AXIS_F091_STALLGUARD/.settings/language.settings.xml
+1_AXIS_F091_Send/.settings/language.settings.xml
+1_AXIS_F091_Receive/.settings/language.settings.xml
+1_AXIS_F091_MAIN/.settings/language.settings.xml
+1_AXIS_F091_Knikker_Demo_V1.0/.settings/language.settings.xml
+1_AXIS_F091_GPIO/.settings/language.settings.xml
+1_AXIS_F091_AMS/.settings/language.settings.xml
