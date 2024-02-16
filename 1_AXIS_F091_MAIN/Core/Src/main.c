@@ -191,8 +191,8 @@ int main(void)
 
 
 
-    TMC5160_Rotate_To(51200, &Ramp1); // move to Position X
-    TMC5160_Rotate_To(0, &Ramp1); // move to Position X
+    //TMC5160_Rotate_To(51200, &Ramp1); // move to Position X
+    //TMC5160_Rotate_To(0, &Ramp1); // move to Position X
 
 
     if(STG_ENB != 1) // keep rotating until stall
@@ -200,6 +200,11 @@ int main(void)
     	TMC5160_Stop();
     	Drive_Enable(0);
     }
+
+    Drive_Enable(1);
+    TMC5160_Basic_Rotate(1, &StallSettings1);
+
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -209,6 +214,9 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+
+
+
 	  if(STG_ENB == 1)
 	  {
 		 HAL_Delay(10);
@@ -219,7 +227,7 @@ int main(void)
 	 	   	// stall event
 	 		 TMC5160_Init_Stallguard(1); // clear stall flag
 
-	 		 //TMC5160_Basic_Rotate(1, &StallSettings1); // continue movement after stall (if needed)
+	 		 TMC5160_Basic_Rotate(1, &StallSettings1); // continue movement after stall (if needed)
 	 	  }
 	  }
   }
