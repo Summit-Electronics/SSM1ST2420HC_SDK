@@ -166,6 +166,7 @@ int main(void)
   CurrentSetting1.IHOLD = 3;
   CurrentSetting1.IRUN 	= 1;
 
+  //test for github sync
 
   TMC5160_Basic_Init(&CurrentSetting1);
 
