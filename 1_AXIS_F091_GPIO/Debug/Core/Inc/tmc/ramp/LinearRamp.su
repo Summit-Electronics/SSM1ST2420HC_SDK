@@ -1,3 +1,0 @@
-../Core/Inc/tmc/ramp/LinearRamp.c:14:6:tmc_linearRamp_init	16	static
-../Core/Inc/tmc/ramp/LinearRamp.c:27:6:tmc_linearRamp_computeRampVelocity	32	static
-../Core/Inc/tmc/ramp/LinearRamp.c:65:6:tmc_linearRamp_computeRampPosition	144	static
