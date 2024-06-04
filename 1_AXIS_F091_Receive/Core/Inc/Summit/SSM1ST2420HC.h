@@ -29,12 +29,15 @@ typedef struct {
 	uint32_t IHOLD;
 } CurrentConfig;
 
+extern int32_t AMS_Resolution;
+extern int32_t ENC_Resolution;
+
 /* TMC5160 functions */
+
 void TMC5160_Basic_Init(CurrentConfig *Current);
 /* Perform basic initialize of the TMC5160 and enable the DRV_Enable pin which controls the H-Bridge signals.
  * IRUN, IHOLD, full scale, see excel sheet for current estimate
  */
-
 void TMC5160_Basic_Rotate(uint8_t Mode, RampConfig *Ramp);
 /* Start stepper rotation in direction: "mode"
  * "mode" 0 or 1, 0 = right , 1 = left
@@ -48,48 +51,47 @@ void TMC5160_Rotate_To(uint32_t Position, RampConfig *Ramp);
 void TMC5160_Stop(void);
 /* Stop all movement by writing VMAX = 0;
  */
-
-void Drive_Enable(int state);
+void TMC5160_Drive_Enable(int state);
 /* Enables the DRV_ENB pin, powering the motor and disabling free movement of the axis
  * "state": int (1 = enable drive , 0 = disable drive)
  */
-
-uint32_t TMC5160_SPIWrite(uint8_t Address, uint32_t Value, int Action);
+void TMC5160_Startup(void);
+/* Performs an SPI check to make sure TMC is powered
+ */
+uint32_t TMC5160_SPIWrite(uint8_t Address, uint32_t Value, int Action, uint8_t *SPICheck);
 /* SPI "action" on register at "Address" for "Value" on the TMC5160
  * "action" 0 or 1, 0 = read, 1 = write
  * "address", see TMC5160 folder
  * "value", uint32_t value for the register
+ * "SPICheck" unint8_t pointer to SPICheck
  */
-uint16_t TMC_Get_Position();
-/* Read the position register on the TMC5160 and convert the result (32 bit) to an angle (Degrees).
+uint32_t TMC5160_Get_Position();
+/* Read the position register on the TMC5160 (32 bit) and return this value.
  */
-
-void TMC5160_Init_Stallguard(int reset);
+void TMC5160_Init_Stallguard(int reset, uint32_t SGT);
 /* Initialize Stallguard
  * "reset" = 1 will reset the stall event and allow the motor to move again
- *
- * TODO: implement TSTEP, TPWMTHRS, TCOOLTHRS, THIGH needed?
- *  //TSTEP>- TPWMTHRS  , stealthchop PWM mode is enabled
- * 	//TCOOLTHRS >- TSTEP , stop on stall is enabled
+ * "SGT" = Stallguard Tuning parameter (-64 to +63) a higher value makes Stallguard less sensitive and requires more torque to indicate a stall
  */
-
 int TMC5160_Monitor_Stallguard(void);
 /* monitor stallguard values
  * returns stallguard Flag value (1 = stall , 0 = no stall)
  */
-
+void TMC5160_Set_Home(void);
+/*set current position as home "0"
+ */
 void TMC5160_Init_Stealthchop(void);
 /* Initialize Stealthchop
  */
 
 /* AMS5055 functions */
+
 void AMS5055_Basic_Init(void);
 /* Wake up the AMS5055 and perform basic initialize, also performs a read angle to calibrate the output of AMS5055_get_Position().
  * only perform this function once
  */
-uint16_t AMS5055_Get_Position(void);
-/* Start a READ_ANGLE event and convert the result (12 bit) to an angle (Degrees).
- * TODO: check reliability
+uint32_t AMS5055_Get_Position(int Calibration);
+/* Start a READ_ANGLE event and return the result (12 bit).
  */
 uint8_t AMSParity(uint16_t value);
 /* Calculate parity bit for SPI transaction
@@ -102,12 +104,16 @@ uint16_t AMS5055_SPIWriteInt(uint16_t Address, int Action);
  */
 
 /* Encoder functions */
-uint16_t ENC_Get_Position(void);
-/* Read the Encoder value register on TMC5160, and convert the result(32 bit) to an angle (Degrees)
- * TODO: check reliability
+
+uint32_t ENC_Get_Position(void);
+/* Read the Encoder value register on TMC5160, and return the result
+ */
+void ENC_Start_position(void);
+/* read start position of encoder for calibartion?
  */
 
 /* GPIO functions */
+
 void Toggle_OUT(int port,uint16_t time);
 /* Toggle (24V) Output on "port" for duration of "time"
  * "port" 1 or 2, respectively OUT1 or OUT2

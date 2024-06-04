@@ -77,6 +77,8 @@ extern uint8_t AMS_Ready;
 #define AMS_MISO_GPIO_Port GPIOA
 #define AMS_MOSI_Pin GPIO_PIN_7
 #define AMS_MOSI_GPIO_Port GPIOA
+#define AMS_INT_Pin GPIO_PIN_0
+#define AMS_INT_GPIO_Port GPIOB
 #define TMC_CS_Pin GPIO_PIN_12
 #define TMC_CS_GPIO_Port GPIOB
 #define TMC_SCK_Pin GPIO_PIN_13
@@ -99,6 +101,7 @@ extern uint8_t AMS_Ready;
 #define REFL_UC_GPIO_Port GPIOB
 #define REFR_UC_Pin GPIO_PIN_7
 #define REFR_UC_GPIO_Port GPIOB
+
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */

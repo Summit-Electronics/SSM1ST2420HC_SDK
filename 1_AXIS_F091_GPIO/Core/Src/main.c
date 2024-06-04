@@ -15,52 +15,6 @@
   *
   ******************************************************************************
   */
-
-/* CODE
-TMC5160
-- SPI interface
-- GPIO DRV_ENN (Low = Motor On, High = Motor Off)
-- GPIO STEP
-- GPIO DIR
-
-40 bit SPI interface (5 x 8 bit message)
-1st 8 bits determine Read / Write and Adress
-2nd to 5th 8 bits are Data
-
-
-AS5055A
-- SPI interface
-- INT GPIO (optional)
-
-TJA1042TK_3_1J
-- CAN interface (CAN1 SEND 0x01 , if CAN2 receives 0x01 , send back 0x02. if CAN1 receives 0x02 , send back 0x01, repeat)
-- GPIO CAN_STB (Low = Normal , High = Standby)  CHECK
-
-EXT_OUT (24V)
-- GPIO EXT_OUT_1
-- GPIO EXT_OUT_2
-
-EXT_IN (24V tolerant)
-- GPIO REFL_UC
-- GPIO REFR_UC
-
-ADC_IN (5V tolerant)
-- AIN AIN_MCU
-
-
-To use the TMC-API, perform the following steps in your code:
-- Implement the tmcXXXX_readWriteArray() function in in your code. This function provides the necessary hardware access to the TMC-API.
-
-- Call tmcXXXX_init() once for each Trinamic IC in your design. This function initializes an IC object which represents one physical IC.
-
-- Call tmcXXXX_periodicJob() periodically. Pass a millisecond timestamp as the tick parameter.
-
-- After initializing, calling tmcXXXX_reset() or tmcXXXX_restore(), the TMC-API will write multiple registers to the IC (referred to as IC configuration).
-Per call to tmcXXXX_periodicJob(), one register will be written until IC configuration is completed.
-Once the IC configuration is completed, you can use tmcXXXX_readInt() and tmcXXXX_writeInt() to read and write registers.
-*/
-
-
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
@@ -108,23 +62,6 @@ static void MX_SPI2_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-/*
-// SPI1 = AS5055A 16 bit data
-uint8_t SPI1TxData[2];	//TX data array SPI1
-uint8_t SPI1RxData[2];	//RX data array SPI1
-uint16_t SPI1Rx = 0;
-uint16_t SPI1Tx = 0;
-uint16_t Angle;
-uint16_t Error;
-uint16_t Angles[100];
-*/
-
-uint16_t ADCReadings[1000];
-int s = 0;
-
-int ReadingData = 0;
-int count = 0;
-
 /* RAMP config */
 RampConfig Ramp1;
 RampConfig StallSettings1;
@@ -134,10 +71,12 @@ RampConfig StopRamp1;
 /* Current config */
 CurrentConfig CurrentSetting1;
 
-/* Settings */
-int AMS_ENB = 0; // 0 = disable Hall sensor , 1 = enable Hall sensor
+/* User Settings */
+int AMS_ENB = 1; // 0 = disable Hall sensor , 1 = enable Hall sensor
 int ENC_ENB = 0; // 0 = disable Encoder , 1 = enable Encoder
 int STG_ENB = 0; // 0 = disable Stallguard, 1 = enable Stallguard
+int32_t AMS_Resolution =  4096; // Hall sensor resolution
+int32_t ENC_Resolution =  8000; // Encoder resolution
 
 /* CAN VARIABLES */  //
 CAN_TxHeaderTypeDef CANTxHeader;
@@ -147,6 +86,12 @@ uint8_t CANTxData[8];	//CANTX data array
 uint8_t CANRxData[8];	//CANRX data array
 uint32_t TxMailbox[3];	//CAN Mailbox
 int Datacheck;			//temp value for checking incomming CAN Data
+
+uint16_t ADCReadings[1000];
+int s = 0;
+
+int ReadingData = 0;
+int count = 0;
 
 /*  CAN RECEIVE INTERRUPT */
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
@@ -204,30 +149,23 @@ int main(void)
   MX_SPI2_Init();
   /* USER CODE BEGIN 2 */
 
-	TMC5160_Stop();
-	HAL_Delay(2500);	//startup delay, so motor does not spin on debug
 
-	Ramp1.VSTART = 10;
-	Ramp1.A1 = 1000;
-	Ramp1.V1 = 10000;
-	Ramp1.AMAX = 12800;
-	Ramp1.VMAX = 51200;
-	Ramp1.DMAX = 700;
-	Ramp1.D1 = 1400;
-	Ramp1.VSTOP = 10;
+  HAL_Delay(25);	//startup delay, so motor does not spin on debug
 
-	CurrentSetting1.IHOLD = 3;
-	CurrentSetting1.IRUN = 1;
+  Ramp1.VSTART = 10;
+  Ramp1.A1 = 1000;
+  Ramp1.V1 = 10000;
+  Ramp1.AMAX = 12800;
+  Ramp1.VMAX = 51200;
+  Ramp1.DMAX = 700;
+  Ramp1.D1 = 1400;
+  Ramp1.VSTOP = 10;
 
-	HAL_GPIO_WritePin(GPIOB, TMC_CS_Pin, 1); // set TMC CS high
+  CurrentSetting1.IHOLD = 3;
+  CurrentSetting1.IRUN = 1;
 
-	TMC5160_Basic_Init(&CurrentSetting1);
-
-	if (AMS_ENB == 1) {
-		AMS5055_Basic_Init();
-	}
-
-	Drive_Enable(1); // enable driver
+  TMC5160_Basic_Init(&CurrentSetting1);
+  TMC5160_Drive_Enable(1);
 
   //Read IN1 (5 to 24V)
   Read_IN(1);
@@ -253,8 +191,8 @@ int main(void)
 
   Read_AIN(); //returns Anlog value
 
-  Drive_Enable(0); //disable drive
-  TMC5160_Stop();
+	TMC5160_Stop();
+	TMC5160_Drive_Enable(0);
 
   /* USER CODE END 2 */
 
@@ -513,7 +451,8 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, CAN_STB_Pin|AMS_CS_Pin|DRV_ENN_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, CAN_STB_Pin|AMS_CS_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA,DRV_ENN_Pin,1);// set DRV enable High so it is not active
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, TMC_CS_Pin|EXT_OUT_1_Pin|EXT_OUT_2_Pin, GPIO_PIN_RESET);
@@ -547,6 +486,10 @@ static void MX_GPIO_Init(void)
   /* EXTI interrupt init*/
   HAL_NVIC_SetPriority(EXTI0_1_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(EXTI0_1_IRQn);
+
+  /* USER CODE BEGIN MX_GPIO_Init_2 */
+  HAL_GPIO_WritePin(GPIOB, TMC_CS_Pin, 1); // make CS high
+  /* USER CODE END MX_GPIO_Init_2 */
 
 }
 

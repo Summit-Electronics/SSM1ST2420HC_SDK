@@ -70,15 +70,16 @@ CAN_RxHeaderTypeDef CANRxHeader;
 RampConfig Ramp1;
 RampConfig StallSettings1;
 RampConfig StealthSettings1;
-RampConfig StopRamp1;
 
 /* Current config */
 CurrentConfig CurrentSetting1;
 
-/* Settings */
+/* User Settings */
 int AMS_ENB = 0; // 0 = disable Hall sensor , 1 = enable Hall sensor
 int ENC_ENB = 0; // 0 = disable Encoder , 1 = enable Encoder
-int STG_ENB = 0; // 0 = disable Stallguard, 1 = enable Stallguard
+int STG_ENB = 1; // 0 = disable Stallguard, 1 = enable Stallguard
+int32_t AMS_Resolution =  4096; // Hall sensor resolution
+int32_t ENC_Resolution =  8000; // Encoder resolution
 
 /* CAN VARIABLES */  //
 CAN_TxHeaderTypeDef CANTxHeader;
@@ -148,8 +149,7 @@ int main(void)
   MX_SPI2_Init();
   /* USER CODE BEGIN 2 */
 
-  TMC5160_Stop();
-  HAL_Delay(2500);	//startup delay, so motor does not spin on debug
+  HAL_Delay(25); //wait for caps to charge
 
   StallSettings1.VSTART = 10;
   StallSettings1.AMAX 	= 51200;
@@ -169,14 +169,33 @@ int main(void)
   CurrentSetting1.IRUN 	= 1;
 
   TMC5160_Basic_Init(&CurrentSetting1);
+  TMC5160_Drive_Enable(1);
 
-  Drive_Enable(1); // enable driver
+  int stall = 0;
 
-  TMC5160_Basic_Rotate(0, &Ramp1);
-  //TMC5160_Basic_Rotate(1, &StallSettings1); //Stallguard example basic movement started
-  //if motor does not spin, check SG_RESULTS and tune current/speed/Stall threshold
-  HAL_Delay(10);
-  TMC5160_Init_Stallguard(0);
+  ///////////////////SENSORLESS HOMING WITH STALLGUARD///////////////////////////////////
+  //rotate untill stall and set stalled position as HOME
+  TMC5160_Basic_Rotate(1, &StallSettings1);
+  TMC5160_Init_Stallguard(0,1);//enable stallguard
+
+  while (stall == 0) //wait for stepper to stall
+  {
+  	if(TMC5160_Monitor_Stallguard() == 1) //stall checker function
+  	{
+  		TMC5160_Drive_Enable(0);
+  		TMC5160_Init_Stallguard(1,0); // clear stall flag
+  		stall = 1;
+  	}
+  }
+
+  TMC5160_Set_Home(); //set current position as home "0"
+////////////////////////////////////////////////////////////////////////////////////
+
+
+  // start moving from Home position.
+  TMC5160_Basic_Rotate(1, &StallSettings1); //start basic movement
+  TMC5160_Init_Stallguard(0,1); //enable stallguard
+
 
   /* USER CODE END 2 */
 
@@ -187,33 +206,15 @@ int main(void)
     /* USER CODE END WHILE */
 
 	/* USER CODE BEGIN 3 */
-
-	HAL_Delay(10);
-
-	if (TMC5160_Monitor_Stallguard() == 1) // stall event
-	{
-		Drive_Enable(0);
-		TMC5160_Init_Stallguard(1); // clear stall flag
-		HAL_Delay(100);
-		Drive_Enable(1);
-
-		TMC5160_Basic_Init(&CurrentSetting1);
-		TMC5160_Init_Stallguard(1); // clear stall flag
-
-		TMC5160_SPIWrite(0x21, 0x00000000, 0);
-		Home = TMC5160_SPIWrite(0x21, 0x00000000, 0); //read step counter from TMC5160
-		HAL_Delay(100);
-
-		TMC5160_Rotate_To((Home+12800),&Ramp1); //1 round
-		TMC5160_Rotate_To((Home),&Ramp1); //1 round
-		TMC5160_Rotate_To((Home-12800),&Ramp1); //1 round
-
-		TMC5160_SPIWrite(0x21, 0x00000000, 0);
-		currentposition = TMC5160_SPIWrite(0x21, 0x00000000, 0); //read step counter from TMC5160
-		HAL_Delay(100);
-
-		//TMC5160_Init_Stallguard(1); // clear stall flag
-	}
+		if (TMC5160_Monitor_Stallguard() == 1)
+		{
+			// stall event
+			TMC5160_Drive_Enable(0);
+			TMC5160_Init_Stallguard(1, 0); // clear stall flag
+			HAL_Delay(1000); //start rotation after 1 sec
+			TMC5160_Drive_Enable(1);
+			TMC5160_Basic_Rotate(1, &StallSettings1); // continue movement after stall (if needed)
+		}
   }
   /* USER CODE END 3 */
 }

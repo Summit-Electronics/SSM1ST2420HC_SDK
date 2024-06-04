@@ -15,35 +15,6 @@
   *
   ******************************************************************************
   */
-
-/* CODE
-TMC5160
-- SPI interface
-- GPIO DRV_ENN (Low = Motor On, High = Motor Off)
-- GPIO STEP
-- GPIO DIR
-
-AS5055A
-- SPI interface
-- INT GPIO (optional)
-
-TJA1042TK_3_1J
-- CAN interface (CAN1 SEND 0x01 , if CAN2 receives 0x01 , send back 0x02. if CAN1 receives 0x02 , send back 0x01, repeat)
-- GPIO CAN_STB (Low = Normal , High = Standby)  CHECK
-
-EXT_OUT (24V)
-- GPIO EXT_OUT_1
-- GPIO EXT_OUT_2
-
-EXT_IN (24V tolerant)
-- GPIO REFL_UC
-- GPIO REFR_UC
-
-ADC_IN (5V tolerant)
-- AIN AIN_MCU
-*/
-
-
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
@@ -68,7 +39,7 @@ ADC_IN (5V tolerant)
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
- ADC_HandleTypeDef hadc;
+ADC_HandleTypeDef hadc;
 
 CAN_HandleTypeDef hcan;
 
@@ -102,10 +73,12 @@ RampConfig StopRamp1;
 /* Current config */
 CurrentConfig CurrentSetting1;
 
-/* Settings */
+/* User Settings */
 int AMS_ENB = 0; // 0 = disable Hall sensor , 1 = enable Hall sensor
 int ENC_ENB = 0; // 0 = disable Encoder , 1 = enable Encoder
 int STG_ENB = 0; // 0 = disable Stallguard, 1 = enable Stallguard
+int32_t AMS_Resolution =  4096; // Hall sensor resolution
+int32_t ENC_Resolution =  8000; // Encoder resolution
 
 /* CAN VARIABLES */  //
 CAN_TxHeaderTypeDef CANTxHeader;
@@ -129,6 +102,15 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 	}
 }
 
+/* AMS INTERRUPT */
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+	if(GPIO_Pin == AMS_INT_Pin && AMS_Ready == 0)
+	{
+		AMS_Ready = 1;
+	}
+}
+
 
 /* USER CODE END 0 */
 
@@ -145,9 +127,7 @@ int main(void)
   /* MCU Configuration--------------------------------------------------------*/
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-
-
-	HAL_Init();
+  HAL_Init();
 
   /* USER CODE BEGIN Init */
 
@@ -167,6 +147,8 @@ int main(void)
   MX_SPI1_Init();
   MX_SPI2_Init();
   /* USER CODE BEGIN 2 */
+
+  HAL_Delay(25); //wait for caps to charge
 
   HAL_CAN_Start(&hcan);
   HAL_CAN_ActivateNotification(&hcan, CAN_IT_RX_FIFO0_MSG_PENDING);
@@ -228,10 +210,9 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI|RCC_OSCILLATORTYPE_HSI14;
-  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI14|RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
   RCC_OscInitStruct.HSI14State = RCC_HSI14_ON;
-  RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
   RCC_OscInitStruct.HSI14CalibrationValue = 16;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
@@ -243,7 +224,7 @@ void SystemClock_Config(void)
   */
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
                               |RCC_CLOCKTYPE_PCLK1;
-  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSE;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
 
@@ -453,26 +434,36 @@ static void MX_SPI2_Init(void)
 static void MX_GPIO_Init(void)
 {
   GPIO_InitTypeDef GPIO_InitStruct = {0};
+/* USER CODE BEGIN MX_GPIO_Init_1 */
+/* USER CODE END MX_GPIO_Init_1 */
 
   /* GPIO Ports Clock Enable */
+  __HAL_RCC_GPIOF_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, CAN_STB_Pin|DRV_ENN_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, CAN_STB_Pin|AMS_CS_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA,DRV_ENN_Pin,1);// set DRV enable High so it is not active
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, EXT_OUT_1_Pin|EXT_OUT_2_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, TMC_CS_Pin|EXT_OUT_1_Pin|EXT_OUT_2_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : CAN_STB_Pin DRV_ENN_Pin */
-  GPIO_InitStruct.Pin = CAN_STB_Pin|DRV_ENN_Pin;
+  /*Configure GPIO pins : CAN_STB_Pin AMS_CS_Pin DRV_ENN_Pin */
+  GPIO_InitStruct.Pin = CAN_STB_Pin|AMS_CS_Pin|DRV_ENN_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : EXT_OUT_1_Pin EXT_OUT_2_Pin */
-  GPIO_InitStruct.Pin = EXT_OUT_1_Pin|EXT_OUT_2_Pin;
+  /*Configure GPIO pin : AMS_INT_Pin */
+  GPIO_InitStruct.Pin = AMS_INT_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(AMS_INT_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : TMC_CS_Pin EXT_OUT_1_Pin EXT_OUT_2_Pin */
+  GPIO_InitStruct.Pin = TMC_CS_Pin|EXT_OUT_1_Pin|EXT_OUT_2_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -490,6 +481,9 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(REFR_UC_GPIO_Port, &GPIO_InitStruct);
 
+/* USER CODE BEGIN MX_GPIO_Init_2 */
+	HAL_GPIO_WritePin(GPIOB, TMC_CS_Pin, 1); // make CS high
+/* USER CODE END MX_GPIO_Init_2 */
 }
 
 /* USER CODE BEGIN 4 */

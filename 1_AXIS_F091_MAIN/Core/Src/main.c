@@ -38,7 +38,7 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
- ADC_HandleTypeDef hadc;
+ADC_HandleTypeDef hadc;
 
 CAN_HandleTypeDef hcan;
 
@@ -46,7 +46,6 @@ SPI_HandleTypeDef hspi1;
 SPI_HandleTypeDef hspi2;
 
 /* USER CODE BEGIN PV */
-
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -66,24 +65,25 @@ static void MX_SPI2_Init(void);
 RampConfig Ramp1;
 RampConfig StallSettings1;
 RampConfig StealthSettings1;
-RampConfig StopRamp1;
 
 /* Current config */
 CurrentConfig CurrentSetting1;
 
-/* Settings */
-int AMS_ENB = 0; // 0 = disable Hall sensor , 1 = enable Hall sensor
+/* User Settings */
+int AMS_ENB = 1; // 0 = disable Hall sensor , 1 = enable Hall sensor
 int ENC_ENB = 0; // 0 = disable Encoder , 1 = enable Encoder
 int STG_ENB = 0; // 0 = disable Stallguard, 1 = enable Stallguard
+int32_t AMS_Resolution =  4096; // Hall sensor resolution
+int32_t ENC_Resolution =  8000; // Encoder resolution
 
-/* CAN VARIABLES */  //
+/* CAN VARIABLES */
 CAN_TxHeaderTypeDef CANTxHeader;
 CAN_RxHeaderTypeDef CANRxHeader;
 
 uint8_t CANTxData[8];	//CANTX data array
 uint8_t CANRxData[8];	//CANRX data array
 uint32_t TxMailbox[3];	//CAN Mailbox
-int Datacheck;			//temp value for checking incomming CAN Data
+int Datacheck;			//value for checking incoming CAN Data
 
 /*  CAN RECEIVE INTERRUPT */
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
@@ -104,6 +104,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 		AMS_Ready = 1;
 	}
 }
+
 /* USER CODE END 0 */
 
 /**
@@ -120,7 +121,7 @@ int main(void)
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
 
-	HAL_Init();
+  HAL_Init();
 
   /* USER CODE BEGIN Init */
 
@@ -141,8 +142,7 @@ int main(void)
   MX_SPI2_Init();
   /* USER CODE BEGIN 2 */
 
-  TMC5160_Stop();
-  HAL_Delay(2500);	//startup delay, so motor does not spin on debug
+  HAL_Delay(25); //wait for caps to charge
 
   Ramp1.VSTART 	= 10;
   Ramp1.A1 		= 1000;
@@ -154,8 +154,8 @@ int main(void)
   Ramp1.VSTOP 	= 10;
 
   StallSettings1.VSTART = 10;
-  StallSettings1.AMAX 	= 51200;
-  StallSettings1.VMAX 	= 102400; // 2 RPS
+  StallSettings1.AMAX 	= 5120;
+  StallSettings1.VMAX 	= 12800;//25600
   StallSettings1.VSTOP 	= 10;
 
   StealthSettings1.VSTART 	= 10;
@@ -164,47 +164,17 @@ int main(void)
   StealthSettings1.VSTOP 	= 10;
 
   CurrentSetting1.IHOLD = 3;
-  CurrentSetting1.IRUN 	= 1;
-
+  CurrentSetting1.IRUN 	= 2;
 
   TMC5160_Basic_Init(&CurrentSetting1);
+  TMC5160_Drive_Enable(1);
 
-  //TMC5160_Init_Stealthchop();
+  TMC5160_Set_Home(); //set current position as home "0"
 
-  if(AMS_ENB == 1)
-  {
-	  AMS5055_Basic_Init();
-  }
-
-  Drive_Enable(1); // enable driver
-
-	if (STG_ENB == 1) {
-		TMC5160_Basic_Rotate(1, &StallSettings1); //Stallguard example basic movement started
-		//if motor does not spin, Stallguard is triggered, adding a delay before init will fix it.
-		TMC5160_Init_Stallguard(0);
-	}
-
-	// WIP stealthchop example
-
-	//TMC5160_Basic_Rotate(1, &Ramp1);
-	//HAL_Delay(2000);
-
-
-
-    //TMC5160_Rotate_To(51200, &Ramp1); // move to Position X
-    //TMC5160_Rotate_To(0, &Ramp1); // move to Position X
-
-
-    if(STG_ENB != 1) // keep rotating until stall
-    {
-    	TMC5160_Stop();
-    	Drive_Enable(0);
-    }
-
-    Drive_Enable(1);
-    TMC5160_Basic_Rotate(1, &StallSettings1);
-
-
+  TMC5160_Rotate_To(25600, &Ramp1);
+  TMC5160_Rotate_To(0, &Ramp1);
+  TMC5160_Rotate_To(-51200, &Ramp1);
+  TMC5160_Rotate_To(0, &Ramp1);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -212,24 +182,7 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-
     /* USER CODE BEGIN 3 */
-
-
-
-	  if(STG_ENB == 1)
-	  {
-		 HAL_Delay(10);
-	 	 TMC5160_Monitor_Stallguard();
-
-	 	  if(TMC5160_Monitor_Stallguard()== 1)
-	 	  {
-	 	   	// stall event
-	 		 TMC5160_Init_Stallguard(1); // clear stall flag
-
-	 		 TMC5160_Basic_Rotate(1, &StallSettings1); // continue movement after stall (if needed)
-	 	  }
-	  }
   }
   /* USER CODE END 3 */
 }
@@ -359,7 +312,6 @@ static void MX_CAN_Init(void)
 
 
   /* CAN filter */
-
   CAN_FilterTypeDef  sFilterConfig;
 
   sFilterConfig.FilterActivation = ENABLE;
@@ -377,7 +329,6 @@ static void MX_CAN_Init(void)
 
   HAL_CAN_Start(&hcan);
   HAL_CAN_ActivateNotification(&hcan, CAN_IT_RX_FIFO0_MSG_PENDING);
-
   /* USER CODE END CAN_Init 2 */
 
 }
@@ -519,6 +470,9 @@ static void MX_GPIO_Init(void)
   HAL_NVIC_SetPriority(EXTI0_1_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(EXTI0_1_IRQn);
 
+  /* USER CODE BEGIN MX_GPIO_Init_2 */
+    HAL_GPIO_WritePin(GPIOB, TMC_CS_Pin, 1); // make CS high
+  /* USER CODE END MX_GPIO_Init_2 */
 }
 
 /* USER CODE BEGIN 4 */
