@@ -112,7 +112,9 @@ void TMC5160_Init_Stealthchop(void)//TODO: finalize
 {
 	TMC5160_SPIWrite(0x00, 0x0000000C, 1, &SPICheckValue); //enable PWM
 	TMC5160_SPIWrite(0x70, 0xC40C011E, 1, &SPICheckValue); //enable PWM autoscale
-	TMC5160_SPIWrite(0x35, 0x00000040, 1, &SPICheckValue); //0x35(RAMP_STAT)
+	//TMC5160_SPIWrite(0x35, 0x00000040, 1, &SPICheckValue); //0x35(RAMP_STAT)
+
+	//check 0x6f DRV_STATUS for stealth flag
 }
 
 void TMC5160_Init_Stallguard(int reset, uint32_t SGT)

@@ -15,6 +15,10 @@ uint16_t AmsPos = 0; //for logging
 uint32_t AMSoffset = 0;
 uint32_t Previous_AMS_Angle = 2000;
 uint32_t Wrapper = 0;
+uint32_t AMS_Pos = 0;
+uint32_t ENC_Pos = 0;
+uint32_t TMC_Pos = 0;
+
 
 /* SPI VARIABLES */
 #define MAX_WRITE_ACTIONS 80 //TMC5160 has less registers
@@ -226,13 +230,14 @@ void TMC5160_Basic_Rotate(uint8_t Mode, RampConfig *Ramp) // 0 = Velocity Mode +
 void TMC5160_Rotate_To(uint32_t Position, RampConfig *Ramp)
 {
 	uint32_t Target_Pos = 0;
-	uint32_t AMS_Pos = 0;
-	uint32_t ENC_Pos = 0;
-	uint32_t TMC_Pos = 0;
 
 	//int AMS_TMC_True = 0;
 	//int ENC_TMC_True = 0;
 	//int AMS_ENC_True = 0;
+
+	AMS_Pos = 0;
+	ENC_Pos = 0;
+	TMC_Pos = 0;
 
 	int Pos_Reached = 0;
 
@@ -280,9 +285,10 @@ void TMC5160_Rotate_To(uint32_t Position, RampConfig *Ramp)
 
 		if (SPICheckValue & 0x20) //bit 5 = position reached
 		{
-			/*
-			 *	Compare to AMS & ENC sensor data
-			 */
+			if(abs(TMC_Pos - AMS_Pos) > 100)
+			{
+				Error_Handler();//pos not reached
+			}
 
 			Pos_Reached = 1; //to break loop
 		}

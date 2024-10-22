@@ -103,6 +103,7 @@ extern uint8_t AMS_Ready;
 #define REFL_UC_GPIO_Port GPIOB
 #define REFR_UC_Pin GPIO_PIN_7
 #define REFR_UC_GPIO_Port GPIOB
+
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
