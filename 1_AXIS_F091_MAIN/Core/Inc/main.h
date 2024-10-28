@@ -62,6 +62,7 @@ extern int Ax;
 extern uint16_t Angles[4100];
 extern int AMS_ENB;
 extern int ENC_ENB;
+extern int ENC_HOME;
 extern uint8_t AMS_Ready;
 
 /* USER CODE END EFP */
@@ -104,6 +105,8 @@ extern uint8_t AMS_Ready;
 #define REFL_UC_GPIO_Port GPIOB
 #define REFR_UC_Pin GPIO_PIN_7
 #define REFR_UC_GPIO_Port GPIOB
+#define BOOT0_Pin GPIO_PIN_11
+#define BOOT0_GPIO_Port GPIOF
 
 /* USER CODE BEGIN Private defines */
 

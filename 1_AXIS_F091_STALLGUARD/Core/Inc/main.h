@@ -63,6 +63,7 @@ extern int Ax;
 extern uint16_t Angles[4100];
 extern int AMS_ENB;
 extern int ENC_ENB;
+extern int ENC_HOME;
 extern uint8_t AMS_Ready;
 
 /* USER CODE END EFP */

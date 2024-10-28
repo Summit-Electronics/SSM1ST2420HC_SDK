@@ -15,9 +15,6 @@ uint16_t AmsPos = 0; //for logging
 uint32_t AMSoffset = 0;
 uint32_t Previous_AMS_Angle = 2000;
 uint32_t Wrapper = 0;
-uint32_t AMS_Pos = 0;
-uint32_t ENC_Pos = 0;
-uint32_t TMC_Pos = 0;
 
 
 /* SPI VARIABLES */
@@ -80,7 +77,6 @@ void TMC5160_Basic_Init(CurrentConfig *Current)
 	TMC5160_SPIWrite(0x33, 0x00000000, 1, &SPICheckValue); // writing value 0x00000000 = 0 = 0.0 to address 25 = 0x33(VDCMIN)
 	TMC5160_SPIWrite(0x34, 0x00000000, 1, &SPICheckValue); // writing value 0x00000000 = 0 = 0.0 to address 26 = 0x34(SW_MODE)
 	TMC5160_SPIWrite(0x38, 0x00000000, 1, &SPICheckValue); // writing value 0x00000000 = 0 = 0.0 to address 27 = 0x38(ENCMODE)
-	TMC5160_SPIWrite(0x39, 0x00000000, 1, &SPICheckValue); // writing value 0x00000000 = 0 = 0.0 to address 28 = 0x39(X_ENC)
 	TMC5160_SPIWrite(0x3A, 0x00010000, 1, &SPICheckValue); // writing value 0x00010000 = 65536 = 0.0 to address 29 = 0x3A(ENC_CONST)
 	TMC5160_SPIWrite(0x3D, 0x00000000, 1, &SPICheckValue); // writing value 0x00000000 = 0 = 0.0 to address 30 = 0x3D(ENC_DEVIATION)
 	TMC5160_SPIWrite(0x60, 0xAAAAB554, 1, &SPICheckValue); // writing value 0xAAAAB554 = 0 = 0.0 to address 31 = 0x60(MSLUT[0])
@@ -98,15 +94,28 @@ void TMC5160_Basic_Init(CurrentConfig *Current)
 	TMC5160_SPIWrite(0x6E, 0x00000000, 1, &SPICheckValue); // writing value 0x00000000 = 0 = 0.0 to address 43 = 0x6E(DCCTRL)
 	TMC5160_SPIWrite(0x70, 0xC40C001E, 1, &SPICheckValue); // writing value 0xC40C001E = 0 = 0.0 to address 44 = 0x70(PWMCONF)
 
-	  if(ENC_ENB == 1)
+	ENC_Factor = (51200.0 / ENC_Resolution);
+	AMS_Factor = (51200.0 / AMS_Resolution);
+
+	if(ENC_HOME == 1)
 	  {
-		  ENC_Factor = (51200.0 / ENC_Resolution);
-		  ENC_Start_position(); // set encoder current position to 0
+		TMC5160_SPIWrite(0x38, 0x00000134, 1, &SPICheckValue); // writing value 0x00000000 = 0 = 0.0 to address 27 = 0x38(ENCMODE)
+							 //0x00000124 for clear ONCE at N-event
+
+		//latch and clear encoder counter X_ENC ONCE at N-event
+		//N-event occurs when polarities B and A ,match both set at 0
+		//pol-N = 1 active high
+		//encoder X_ENC should now be set to 0 when N event occurs which occurs when crossing Home position.
+
+		//will X_ENC be reset to 0 every time N-event occurs?
+		//could be helpfull with position calibration during operation!
+
+
+		ENC_Start_position(); // read encoder current position
 	  }
 
 	  if(AMS_ENB == 1)
 	  {
-		  AMS_Factor = (51200.0 / AMS_Resolution);
 		  AMS5055_Basic_Init(); // set Hall sensor offset to current position
 	  }
 
@@ -116,7 +125,9 @@ void TMC5160_Init_Stealthchop(void)//TODO: finalize
 {
 	TMC5160_SPIWrite(0x00, 0x0000000C, 1, &SPICheckValue); //enable PWM
 	TMC5160_SPIWrite(0x70, 0xC40C011E, 1, &SPICheckValue); //enable PWM autoscale
-	TMC5160_SPIWrite(0x35, 0x00000040, 1, &SPICheckValue); //0x35(RAMP_STAT)
+	//TMC5160_SPIWrite(0x35, 0x00000040, 1, &SPICheckValue); //0x35(RAMP_STAT)
+
+	//check 0x6f DRV_STATUS for stealth flag
 }
 
 void TMC5160_Init_Stallguard(int reset, uint32_t SGT)
@@ -230,15 +241,9 @@ void TMC5160_Basic_Rotate(uint8_t Mode, RampConfig *Ramp) // 0 = Velocity Mode +
 void TMC5160_Rotate_To(uint32_t Position, RampConfig *Ramp)
 {
 	uint32_t Target_Pos = 0;
-
-	//int AMS_TMC_True = 0;
-	//int ENC_TMC_True = 0;
-	//int AMS_ENC_True = 0;
-
-	AMS_Pos = 0;
-	ENC_Pos = 0;
-	TMC_Pos = 0;
-
+	uint32_t AMS_Pos = 0;
+	uint32_t ENC_Pos = 0;
+	uint32_t TMC_Pos = 0;
 	int Pos_Reached = 0;
 
 	TMC5160_SPIWrite(0x11, 	0x0000000A, 1, &SPICheckValue); 	// writing value 0x0000000A = 10 = 0.0 to address 9 = 0x11(TPOWERDOWN)
@@ -267,6 +272,7 @@ void TMC5160_Rotate_To(uint32_t Position, RampConfig *Ramp)
 		TMC_Pos = 1;
 	}
 
+
 	//Enter loop to check if position is reached
 	while(Pos_Reached != 1) // loop until Position is reached
 	//while(TMC_Pos != Target_Pos)
@@ -280,15 +286,15 @@ void TMC5160_Rotate_To(uint32_t Position, RampConfig *Ramp)
 
 		if(ENC_ENB == 1)// if enabled, check Encoder position
 		{
-			ENC_Pos = (ENC_Get_Position()) * ENC_Factor;
+			ENC_Pos = ENC_Get_Position();
 		}
+
 
 		if (SPICheckValue & 0x20) //bit 5 = position reached
 		{
-			if(abs(TMC_Pos - AMS_Pos) > 100)
-			{
-				Error_Handler();//pos not reached
-			}
+			/*
+			 *	Compare to AMS & ENC sensor data
+			 */
 
 			Pos_Reached = 1; //to break loop
 		}
@@ -327,19 +333,31 @@ void TMC5160_Drive_Enable(int state)
 			{
 				HAL_GPIO_WritePin(GPIOA, DRV_ENN_Pin, 1); // High = OFF
 				HAL_Delay(1000);
+
+			continue;
 			}
 
 	    	if (SPICheckValue & 0x02) //bit 1 = driver_error
 			{
 				HAL_GPIO_WritePin(GPIOA, DRV_ENN_Pin, 1); // HIGH = OFF
 				HAL_Delay(1000);
+
+				TMC5160_SPIWrite(0x01, 0x00000002, 1, &SPICheckValue); //clear drive error bit
+
+				continue;
 			}
 
 	    	IOIN = TMC5160_SPIWrite(0x04, 0x00000000, 0, &SPICheckValue);
 
+
 	    	if((IOIN & (1 <<4)) == 0) // check if DRV_ENN is set in software
 	    	{
 	    		Started = 1; //no issues during motor power up.
+	    	}
+	    	else
+	    	{
+	    		HAL_GPIO_WritePin(GPIOA, DRV_ENN_Pin, 1);  // HIGH = OFF if not successfully enabled
+	    		HAL_Delay(1000);  // Retry after delay
 	    	}
 		}
 	}
@@ -385,12 +403,35 @@ void TMC5160_Startup(void)
 		//TMC not correctly written, try again.
 		TMC5160_SPIWrite(0x00, 0x00000008, 1, &SPICheckValue); // writing value 0x00000008 = 8 = 0.0 to address 0 = 0x00(GCONF)
 		GCONF = TMC5160_SPIWrite(0x00, 0x00000008, 0, &SPICheckValue); // writing value 0x00000008 = 8 = 0.0 to address 0 = 0x00(GCONF)
-		while (GCONF & 0x00000008)
+		while (!(GCONF & 0x00000008))
 		{
 			//TMC not correctly written, try again.
 			TMC5160_SPIWrite(0x00, 0x00000008, 1, &SPICheckValue); // writing value 0x00000008 = 8 = 0.0 to address 0 = 0x00(GCONF)
 			GCONF = TMC5160_SPIWrite(0x00, 0x00000008, 0, &SPICheckValue); // writing value 0x00000008 = 8 = 0.0 to address 0 = 0x00(GCONF)
 		}
+	}
+
+	//if reset bit is set, clear it and read if it's cleared
+	if (SPI2RxData[0] & 0x01) // reset bit set , rewrite all registers from backup
+	{
+		HAL_GPIO_WritePin(GPIOB, TMC_CS_Pin, 0); // set TMC CS low
+		SPI2TxData[0] = 0x81;
+		SPI2TxData[1] = 0x00;
+		SPI2TxData[2] = 0x00;
+		SPI2TxData[3] = 0x00;
+		SPI2TxData[4] = 0x01; // clear reset flag
+		HAL_SPI_TransmitReceive(&hspi2, SPI2TxData, SPI2RxData, 0x05, 100); //transmit, clear reset flag
+		HAL_GPIO_WritePin(GPIOB, TMC_CS_Pin, 1); // set TMC CS high
+
+		HAL_Delay(5);
+
+		HAL_GPIO_WritePin(GPIOB, TMC_CS_Pin, 0); // set TMC CS low
+		SPI2TxData[0] = 0x01;
+		SPI2TxData[1] = 0x00;
+		SPI2TxData[2] = 0x00;
+		SPI2TxData[3] = 0x00;
+		SPI2TxData[4] = 0x00;
+		HAL_SPI_TransmitReceive(&hspi2, SPI2TxData, SPI2RxData, 0x05, 100); //read, reset flag
 	}
 
 	TMC_Boot = 1;
@@ -735,20 +776,24 @@ uint16_t AMS5055_SPIWriteInt(uint16_t Address, int Action)
 	  return SPI1Rx;
 }
 
-uint32_t ENC_Get_Position(void)
+int32_t ENC_Get_Position(void)
 {
-	uint32_t Enc_Position = TMC5160_SPIWrite(0x39, 0x00000000, 0, &SPICheckValue); // read encoder position
+	int32_t Enc_Position = TMC5160_SPIWrite(0x39, 0x00000000, 0, &SPICheckValue); // read encoder position
+	float Fenc_Pos = Enc_Position;
+
+	Fenc_Pos = Fenc_Pos * ENC_Factor;
+	Enc_Position = (int32_t)Fenc_Pos;
 
 	Enc_Position = ((Enc_Position) * (-1)); // to fix orientation
 
 	return Enc_Position;
 }
 
-void ENC_Start_position(void)
+void ENC_Start_position(void) //set current position to start position
 {
 	TMC5160_SPIWrite(0x39, 0x00000000, 1, &SPICheckValue); //write current position to 0
-	TMC5160_SPIWrite(0x39, 0x00000000, 0, &SPICheckValue); // read encoder position
 }
+
 
 void Toggle_OUT(int port ,uint16_t time)
 {

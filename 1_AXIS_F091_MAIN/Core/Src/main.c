@@ -70,8 +70,9 @@ RampConfig StealthSettings1;
 CurrentConfig CurrentSetting1;
 
 /* User Settings */
-int AMS_ENB = 1; // 0 = disable Hall sensor , 1 = enable Hall sensor
+int AMS_ENB = 0; // 0 = disable Hall sensor , 1 = enable Hall sensor
 int ENC_ENB = 0; // 0 = disable Encoder , 1 = enable Encoder
+int ENC_HOME = 0; // 0 = don't reset ENC counter at Z-event, 1 = reset at Z-event (for homing)
 int STG_ENB = 0; // 0 = disable Stallguard, 1 = enable Stallguard
 int32_t AMS_Resolution =  4096; // Hall sensor resolution
 int32_t ENC_Resolution =  8000; // Encoder resolution
@@ -155,11 +156,14 @@ int main(void)
   CurrentSetting1.IHOLD = 3;
   CurrentSetting1.IRUN 	= 3;
 
-  TMC5160_Basic_Init(&CurrentSetting1);
-  TMC5160_Drive_Enable(1);
-  HAL_Delay(200);
+  TMC5160_Drive_Enable(0);
 
-  TMC5160_Basic_Rotate(1, &Ramp1);
+  TMC5160_Basic_Init(&CurrentSetting1);
+  HAL_Delay(1000);
+  TMC5160_Drive_Enable(1);
+  HAL_Delay(1000);
+  TMC5160_Set_Home();
+  TMC5160_Rotate_To(51200, &Ramp1);
 
   /* USER CODE END 2 */
 
@@ -202,7 +206,7 @@ void SystemClock_Config(void)
                               |RCC_CLOCKTYPE_PCLK1;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSE;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
 
   if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
   {
@@ -280,7 +284,7 @@ static void MX_CAN_Init(void)
 
   /* USER CODE END CAN_Init 1 */
   hcan.Instance = CAN;
-  hcan.Init.Prescaler = 16;
+  hcan.Init.Prescaler = 8;
   hcan.Init.Mode = CAN_MODE_NORMAL;
   hcan.Init.SyncJumpWidth = CAN_SJW_1TQ;
   hcan.Init.TimeSeg1 = CAN_BS1_2TQ;
@@ -457,6 +461,12 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : BOOT0_Pin */
+  GPIO_InitStruct.Pin = BOOT0_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  HAL_GPIO_Init(BOOT0_GPIO_Port, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
   HAL_NVIC_SetPriority(EXTI0_1_IRQn, 0, 0);

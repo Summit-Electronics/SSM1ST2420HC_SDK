@@ -109,7 +109,7 @@ int32_t ENC_Get_Position(void);
 /* Read the Encoder value register on TMC5160, and return the result
  */
 void ENC_Start_position(void);
-/* read start position of encoder for calibartion?
+/*set current position to 0 for homing
  */
 
 /* GPIO functions */
